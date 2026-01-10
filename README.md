@@ -91,7 +91,7 @@ YourVault/
 | `/a-schedule` | 作息状态检查 |
 | `/a-status` | 系统状态检查 |
 | `/a-config` | 配置管理 |
-| `/cc-activity [日期]` | Claude Code 活动分析 |
+| `/cc-activity [日期]` | 活动分析 - 时间线和目标统计 |
 
 ### Skills
 

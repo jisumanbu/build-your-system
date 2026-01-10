@@ -5,11 +5,7 @@ created: 2026-01-10
 # 偏好配置
 
 ```yaml
-# YOLO 模式：true = 自动执行不询问
-yolo_mode: false
-
-# 自动整合：true = 会话结束自动整理 inbox
-auto_integrate: false
+language: zh-CN
 ```
 
 ## 作息安排

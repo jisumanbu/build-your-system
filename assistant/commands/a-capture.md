@@ -43,13 +43,7 @@ argument-hint: "<内容>"
 1. **所有内容统一进 inbox**，不做分发
 2. Review 时再决定去向
 3. 类型标签必选1个，其他可选
-4. YOLO 模式下直接保存，不询问确认
-
-## YOLO 模式
-
-根据 `06-Memory/preferences.md` 中的 `yolo_mode` 设置：
-- `yolo_mode: true` → 直接保存
-- `yolo_mode: false` → 先展示分类结果，询问确认
+4. 直接保存，不询问确认
 
 ## 示例
 

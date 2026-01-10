@@ -31,7 +31,7 @@ fi
 if [ -f "$VAULT/06-Memory/preferences.md" ]; then
   echo "### 偏好配置"
   # 提取 YAML 块中的关键设置
-  sed -n '/```yaml/,/```/p' "$VAULT/06-Memory/preferences.md" | grep -E "yolo_mode|auto_integrate" || echo "未找到配置"
+  sed -n '/```yaml/,/```/p' "$VAULT/06-Memory/preferences.md" | grep -E "language" || echo "使用默认配置"
   echo ""
 fi
 
