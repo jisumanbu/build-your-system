@@ -1,4 +1,4 @@
-# Personal Assistant Plugin
+# Build Your System
 
 个人 AI 助手系统 v3.0 - Claude Code Plugin 版本
 
@@ -13,23 +13,28 @@
 
 ## 安装
 
-### 方式一：Claude Code Marketplace（推荐）
+### 方式一：添加 Marketplace（推荐）
 
 ```bash
 # 在 Claude Code 中运行
-/install-plugin jisumanbu/personal-assistant-plugin
+/plugin
+
+# 选择 "Add Marketplace"，输入：
+jisumanbu/build-your-system
+
+# 然后选择安装 personal-assistant plugin
 ```
 
 ### 方式二：Git Clone
 
 ```bash
-git clone https://github.com/jisumanbu/personal-assistant-plugin.git \
+git clone https://github.com/jisumanbu/build-your-system.git \
   ~/.claude/plugins/local/personal-assistant
 ```
 
 ### 方式三：手动下载
 
-1. 从 [GitHub](https://github.com/jisumanbu/personal-assistant-plugin) 下载
+1. 从 [GitHub](https://github.com/jisumanbu/build-your-system) 下载
 2. 解压到 `~/.claude/plugins/local/personal-assistant/`
 
 ## 首次设置

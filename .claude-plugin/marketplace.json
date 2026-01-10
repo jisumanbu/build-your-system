@@ -1,0 +1,18 @@
+{
+  "name": "build-your-system",
+  "description": "Personal AI assistant for task management, knowledge management, and media content creation based on Obsidian Vault",
+  "owner": {
+    "name": "jliu",
+    "url": "https://github.com/jisumanbu"
+  },
+  "plugins": [
+    {
+      "name": "personal-assistant",
+      "source": "./",
+      "description": "Personal AI assistant with 20 commands (task capture, daily review, media content creation) and 5 reusable skills. Based on Jenny Hoyos methodology for short-form video creation.",
+      "version": "3.0.0",
+      "category": "productivity",
+      "homepage": "https://github.com/jisumanbu/build-your-system"
+    }
+  ]
+}
