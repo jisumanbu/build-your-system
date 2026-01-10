@@ -1,19 +1,17 @@
 # Build Your System
 
-个人 AI 助手系统 v3.0 - Claude Code Plugin 版本
+基于 Obsidian Vault 的个人效率系统 - 包含两个可独立安装的 Claude Code Plugin。
 
-一个基于 Obsidian Vault 的个人任务管理、知识管理和短视频创作助手。
+## 两个 Plugin
 
-## 功能特性
-
-- **任务管理**：快速捕获、每日回顾、任务概览
-- **知识管理**：自动标签识别、inbox 分发、周记整合
-- **短视频创作**：选题评估、Hook 设计、逐字稿生成（基于 Jenny Hoyos 方法论）
-- **自动上下文**：SessionStart 自动加载用户画像和当日任务
+| Plugin | 功能 | 命令数 |
+|--------|------|--------|
+| **assistant** | 任务管理、知识管理、每日回顾 | 10 个 |
+| **media** | 短视频创作（Jenny Hoyos 方法论） | 10 个 |
 
 ## 安装
 
-### 方式一：添加 Marketplace（推荐）
+### 方式一：Marketplace（推荐）
 
 ```bash
 # 在 Claude Code 中运行
@@ -22,30 +20,29 @@
 # 选择 "Add Marketplace"，输入：
 jisumanbu/build-your-system
 
-# 然后选择安装 personal-assistant plugin
+# 选择要安装的 plugin：
+# - assistant: 任务管理、知识分发
+# - media: 短视频创作
+# - 或两个都安装
 ```
 
 ### 方式二：Git Clone
 
 ```bash
-git clone https://github.com/jisumanbu/build-your-system.git \
-  ~/.claude/plugins/local/personal-assistant
+# 克隆仓库
+git clone https://github.com/jisumanbu/build-your-system.git
+
+# 安装 assistant
+cp -r build-your-system/assistant ~/.claude/plugins/local/
+
+# 安装 media（可选）
+cp -r build-your-system/media ~/.claude/plugins/local/
 ```
 
-### 方式三：手动下载
-
-1. 从 [GitHub](https://github.com/jisumanbu/build-your-system) 下载
-2. 解压到 `~/.claude/plugins/local/personal-assistant/`
-
-## 首次设置
-
-### 1. 运行设置向导
+## 首次设置（assistant plugin）
 
 ```bash
-# 启动 Claude Code
-claude
-
-# 运行设置命令
+# 运行设置向导
 /a-setup
 ```
 
@@ -54,28 +51,7 @@ claude
 - 检查必需目录结构
 - 创建示例配置文件
 
-### 2. 手动配置（可选）
-
-```bash
-# 复制配置模板
-cd ~/.claude/plugins/local/personal-assistant
-cp .config/settings.sh.example .config/settings.sh
-
-# 编辑配置
-# 将 VAULT_PATH 改为你的 Obsidian Vault 路径
-```
-
-### 3. 验证安装
-
-```bash
-/a-status
-```
-
-应该显示 Vault 状态和 MCP 连接状态。
-
 ## 前置条件
-
-### 必需
 
 - **Claude Code CLI** - 最新版本
 - **Obsidian** - 用于管理 Vault
@@ -90,17 +66,19 @@ YourVault/
 ├── 02-Tasks/
 │   └── active.md         # 当前任务
 ├── 03-Areas/
-│   └── media/topics/     # 视频选题（可选）
+│   └── media/topics/     # 视频选题（media plugin）
 └── 06-Memory/
     ├── profile.md        # 用户画像
     └── preferences.md    # 偏好配置
 ```
 
-参考 `examples/minimal-vault/` 获取最小化示例。
+---
 
-## 命令列表
+## Assistant Plugin
 
-### 助手命令 (a-*)
+个人 AI 助手 - 任务捕获、每日回顾、知识分发。
+
+### 命令
 
 | 命令 | 功能 |
 |------|------|
@@ -115,7 +93,27 @@ YourVault/
 | `/a-config` | 配置管理 |
 | `/cc-activity [日期]` | Claude Code 活动分析 |
 
-### 自媒体命令 (m-*)
+### Skills
+
+| Skill | 用途 |
+|-------|------|
+| capture-rules | 标签识别、分发规则 |
+| vault-structure | Vault 路径、模板格式 |
+
+### 自动上下文
+
+SessionStart hook 自动加载：
+- `06-Memory/profile.md` - 用户画像
+- `06-Memory/preferences.md` - 偏好配置
+- `02-Tasks/active.md` - 当前任务
+
+---
+
+## Media Plugin
+
+短视频创作助手 - 基于 Jenny Hoyos 方法论的完整视频创作流程。
+
+### 命令
 
 | 命令 | 功能 |
 |------|------|
@@ -134,56 +132,52 @@ YourVault/
 
 | Skill | 用途 |
 |-------|------|
-| capture-rules | 标签识别、分发规则 |
-| vault-structure | Vault 路径、模板格式 |
-| jenny-hoyos-method | 视频方法论 |
+| jenny-hoyos-method | Hook/结构/节奏方法论 |
 | script-writing | 口语化写作、去 AI 味 |
 | transcript-cleaner | 语音转录清洗 |
+
+---
 
 ## 快速开始
 
 ```bash
-# 1. 快速捕获一个任务
+# 快速捕获一个任务
 /a-capture #task 完成项目报告 📅 2026-01-15 ⏫
 
-# 2. 查看当前任务
+# 查看当前任务
 /a-tasks
 
-# 3. 每日回顾（分发 inbox 内容）
+# 每日回顾（分发 inbox 内容）
 /a-review
 
-# 4. 开始一个视频选题
+# 开始一个视频选题（需要 media plugin）
 /m-director 如何用 AI 提高工作效率
 ```
 
 ## 目录结构
 
 ```
-~/.claude/plugins/local/personal-assistant/
+build-your-system/
 ├── .claude-plugin/
-│   └── plugin.json           # Plugin 配置
-├── .config/
-│   ├── settings.sh           # 用户配置（git ignored）
-│   └── settings.sh.example   # 配置模板
-├── commands/
-│   ├── assistant/            # 10 个助手命令
-│   └── media/                # 10 个自媒体命令
-├── skills/
-│   ├── capture-rules/        # 标签识别规则
-│   ├── vault-structure/      # Vault 导航
-│   ├── jenny-hoyos-method/   # 视频方法论
-│   ├── script-writing/       # 口语化写作
-│   └── transcript-cleaner/   # 转录清洗
-├── hooks/
-│   ├── hooks.json            # Hook 配置
-│   └── scripts/
-│       └── load-context.sh   # SessionStart 加载脚本
-├── scripts/
-│   └── analyze-cc-activity.py
+│   └── marketplace.json      # 列出两个 plugin
+├── assistant/                # Plugin 1
+│   ├── .claude-plugin/
+│   │   └── plugin.json
+│   ├── commands/             # 10 个 a-* 命令
+│   ├── skills/               # capture-rules, vault-structure
+│   ├── hooks/                # SessionStart
+│   ├── scripts/              # analyze-cc-activity.py
+│   └── .config/
+├── media/                    # Plugin 2
+│   ├── .claude-plugin/
+│   │   └── plugin.json
+│   ├── commands/             # 10 个 m-* 命令
+│   └── skills/               # jenny-hoyos-method, script-writing, transcript-cleaner
 ├── examples/
-│   └── minimal-vault/        # 最小化 Vault 示例
+│   └── minimal-vault/
+├── README.md
 ├── LICENSE
-└── README.md
+└── CHANGELOG.md
 ```
 
 ## 外部依赖（可选）
@@ -196,29 +190,11 @@ YourVault/
 2. **obsidian-skills** - Obsidian 格式规范（Markdown/Bases/Canvas）
    - 来源：kepano/obsidian-skills
 
-## 测试
-
-### 快速验证
-
-```bash
-# 1. 检查系统状态
-/a-status
-
-# 2. 测试捕获
-/a-capture 测试内容 #task
-
-# 3. 查看 inbox
-# 检查 00-Inbox/inbox.md 是否有新内容
-```
-
-### 完整 E2E 测试
-
-见 `examples/` 目录的测试场景。
-
 ## 版本历史
 
 ### v3.0.0 (2026-01-10)
-- 升级为 Claude Code Plugin
+- 拆分为两个独立 plugin：assistant 和 media
+- 支持 Marketplace 安装
 - 迁移 20 个命令到 plugin 格式
 - 提取 5 个可复用 skills
 - 实现 SessionStart hook 自动加载用户上下文
