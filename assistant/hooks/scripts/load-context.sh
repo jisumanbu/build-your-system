@@ -2,10 +2,8 @@
 # Load user context at session start
 # 根据 CLAUDE.md 的"快速上下文"要求加载三个文件
 
-# 读取用户配置
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-PLUGIN_ROOT="$(cd "$SCRIPT_DIR/../.." && pwd)"
-CONFIG_FILE="$PLUGIN_ROOT/.config/settings.sh"
+# 使用 CLAUDE_PLUGIN_ROOT 环境变量（由 Claude Code 提供）
+CONFIG_FILE="${CLAUDE_PLUGIN_ROOT}/.config/settings.sh"
 
 if [ -f "$CONFIG_FILE" ]; then
     source "$CONFIG_FILE"
@@ -14,7 +12,7 @@ else
     echo "⚠️ 未找到配置文件。请运行 /a-setup 进行首次设置。"
     echo ""
     echo "或手动创建配置文件："
-    echo "  cp $PLUGIN_ROOT/.config/settings.sh.example $CONFIG_FILE"
+    echo "  cp ${CLAUDE_PLUGIN_ROOT}/.config/settings.sh.example $CONFIG_FILE"
     echo "  # 编辑 settings.sh 设置你的 Vault 路径"
     exit 0
 fi
