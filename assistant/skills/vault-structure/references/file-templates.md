@@ -2,7 +2,7 @@
 
 ## 选题文件模板
 
-位置：`03-Areas/media/topics/{选题名}.md`
+位置：`20-Areas/media/topics/{选题名}.md`
 
 ```yaml
 ---
@@ -40,7 +40,7 @@ tags: [topic, media]
 ## 逐字稿
 
 - 状态：未开始 | 进行中 | 已完成
-- 文件：[[03-Areas/media/逐字稿/日期-选题名]]
+- 文件：[[20-Areas/media/逐字稿/日期-选题名]]
 
 ## 发布记录
 
@@ -51,7 +51,7 @@ tags: [topic, media]
 
 ## 产品想法文件模板
 
-位置：`03-Areas/indie/ideas/{产品名}.md`
+位置：`20-Areas/indie/ideas/{产品名}.md`
 
 ```yaml
 ---
@@ -95,9 +95,9 @@ tags: [indie, idea]
 - [ ] ...
 ```
 
-## 日记文件模板
+## 日志文件模板
 
-位置：`01-Daily/YYYY-MM-DD.md`
+位置：`00-Inbox/YYYY-MM-DD.md`
 
 ```yaml
 ---
@@ -107,7 +107,7 @@ tags: [daily]
 
 # YYYY-MM-DD 星期X
 
-## 今日记录
+## 日志
 
 ...
 

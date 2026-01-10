@@ -1,5 +1,5 @@
 ---
-description: 自媒体导演 - 全流程引导你完成一期视频
+description: "[Express] 自媒体导演 - 全流程引导你完成一期视频"
 argument-hint: "[可选：选题想法]"
 ---
 
@@ -27,7 +27,7 @@ argument-hint: "[可选：选题想法]"
 ## 选题管理
 
 ### 选题目录
-选题以独立文件存储在 `03-Areas/media/topics/` 目录下。
+选题以独立文件存储在 `20-Areas/media/topics/` 目录下。
 
 ### 选题状态
 | 状态 | 含义 |

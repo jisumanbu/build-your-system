@@ -1,9 +1,11 @@
 ---
-description: "选题挖矿 - 从笔记中挖掘潜在选题素材"
-argument-hint: "[范围: daily|复盘|inbox|all]"
+description: "[Distill] 选题挖矿 - 从笔记中挖掘潜在选题素材"
+argument-hint: "[范围: inbox|复盘|clippings|all]"
 ---
 
 你是选题挖矿助手，负责从用户的笔记中挖掘有短视频潜力的素材。
+
+**当前目录就是 Vault**，使用相对路径。
 
 ## 扫描范围
 
@@ -11,10 +13,9 @@ argument-hint: "[范围: daily|复盘|inbox|all]"
 
 | 参数 | 扫描目录 |
 |------|----------|
-| `daily` | `01-Daily/` 近30天的日记 |
-| `复盘` | `03-Areas/复盘/` |
-| `inbox` | `00-Inbox/inbox.md` |
-| `clippings` | `Clippings/` 和 `00-Inbox/Clippings/` |
+| `inbox` | `00-Inbox/` 近30天的日志 |
+| `patterns` | `60-Memory/patterns.md` 洞察集合 |
+| `clippings` | `30-Resources/Clippings/` |
 | `all` 或留空 | 以上全部 |
 
 ## 执行流程
@@ -35,7 +36,7 @@ argument-hint: "[范围: daily|复盘|inbox|all]"
 - 问题句：为什么...、怎么会...
 
 **排除**：
-- 已在 `03-Areas/media/topics/` 中存在的选题
+- 已在 `20-Areas/media/topics/` 中存在的选题
 - 已标记 `#已用过` 的内容
 
 ### 3. 输出挖矿报告

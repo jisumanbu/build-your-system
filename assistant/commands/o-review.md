@@ -1,46 +1,31 @@
 ---
-description: "[助手] 每日回顾 - inbox 分发 + GRAI 复盘 + 明日规划"
+description: "[Organize] 每日回顾 - inbox 分发 + GRAI 复盘 + 明日规划"
 ---
 
 进行每日回顾，包含 inbox 分发、复盘（GRAI + 4Fs 融合）和明日规划。
 
-## 前置检查
-
-先加载配置获取 Vault 路径：
-
-```bash
-if [ -f ~/.claude/plugins/config/assistant/settings.sh ]; then
-    source ~/.claude/plugins/config/assistant/settings.sh
-    echo "Vault: $VAULT_PATH"
-else
-    echo "ERROR: 未配置。请先运行 /a-setup"
-    exit 1
-fi
-```
-
-如果未配置，停止执行并提示用户运行 `/a-setup`。
-
-以下所有文件路径都以 `$VAULT_PATH` 为前缀。
+**当前目录就是 Vault**，使用相对路径。
 
 ## 文件结构
 
 参考 vault-structure skill 获取完整目录结构。
 
 核心文件：
-- `00-Inbox/inbox.md` - 统一收集箱
-- `01-Daily/{年}/周记-{年}W{周}.md` - #record 归档位置
-- `02-Tasks/active.md` - #task 归档位置
-- `03-Areas/media/topics/` - #topic 独立文件目录
-- `03-Areas/indie/ideas/` - #idea 独立文件目录
-- `06-Memory/patterns.md` - #insight 归档位置
+- `00-Inbox/capture.md` - 统一收集箱
+- `00-Inbox/{YYYY-MM-DD}.md` - 日志 + 复盘
+- `50-GTD/active.md` - #task 归档位置
+- `50-GTD/waiting.md` - #waiting 归档位置
+- `20-Areas/media/topics/` - #topic 独立文件目录
+- `20-Areas/indie/ideas/` - #idea 独立文件目录
+- `60-Memory/patterns.md` - #insight 归档位置
 
 ## 执行流程
 
-### Phase 0: 日记扫描
+### Phase 0: 日志扫描
 
-#### 0.1 读取当天日记
+#### 0.1 读取当天日志
 
-读取 `01-Daily/{YYYY-MM-DD}.md`。如果文件不存在，跳过此阶段。
+读取 `00-Inbox/{YYYY-MM-DD}.md`。如果文件不存在，跳过此阶段。
 
 #### 0.2 识别可提取项
 
@@ -53,45 +38,50 @@ fi
 #### 0.3 展示识别结果
 
 ```
-=== 日记扫描 ===
+=== 日志扫描 ===
 
-在今天的日记中发现以下可提取项：
+在今天的日志中发现以下可提取项：
 
 📋 任务 (2条):
-[1] "要给客户发报价单" → active.md
-[2] "需要整理读书笔记" → active.md
+[1] "要给客户发报价单" → 50-GTD/active.md
+[2] "需要整理读书笔记" → 50-GTD/active.md
+
+⏳ 等待 (1条):
+[3] "等客户回复报价确认" → 50-GTD/waiting.md
 
 🎬 选题 (1条):
-[3] "可以做期提前还贷的视频" → topics/提前还贷.md
+[4] "可以做期提前还贷的视频" → 20-Areas/media/topics/提前还贷.md
 
 如何处理？
 1. ✅ 全部分发
 2. 🔍 逐条确认
-3. ⏭️ 跳过日记扫描
+3. ⏭️ 跳过日志扫描
 ```
 
 #### 0.4 执行分发
 
-**任务**：追加到 `active.md`
+**任务**：追加到 `50-GTD/active.md`
 ```markdown
-- [ ] 任务内容 ← [[2025-12-27]]
+- [ ] 任务内容 ← [[00-Inbox/2025-12-27]]
 ```
 
-**选题**：创建 `topics/{选题名}.md`（使用选题模板）
+**等待**：追加到 `50-GTD/waiting.md`
 
-**洞察**：追加到 `patterns.md`
+**选题**：创建 `20-Areas/media/topics/{选题名}.md`（使用选题模板）
+
+**洞察**：追加到 `60-Memory/patterns.md`
 
 #### 0.5 标记已处理
 
-在日记原文中添加标记：`内容 ✓→[[目标]]`
+在日志原文中添加标记：`内容 ✓→[[目标]]`
 
 ---
 
 ### Phase 1: Inbox 分发
 
-#### 1.1 读取 inbox.md
+#### 1.1 读取 capture.md
 
-读取 `00-Inbox/inbox.md`，解析所有条目。
+读取 `00-Inbox/capture.md`，解析所有条目。
 
 #### 1.2 分组展示
 
@@ -101,6 +91,7 @@ fi
 === Inbox Review (N条待处理) ===
 
 📋 任务 (#task) - X条
+⏳ 等待 (#waiting) - X条
 📹 选题 (#topic) - X条
 💡 灵感 (#idea) - X条
 📝 记录 (#record) - X条
@@ -121,11 +112,12 @@ fi
 
 | 类型标签 | 目标位置 | 操作方式 |
 |----------|----------|----------|
-| `#task` | `02-Tasks/active.md` | 追加 |
-| `#topic` | `03-Areas/media/topics/{选题名}.md` | **创建文件** |
-| `#idea` | `03-Areas/indie/ideas/{产品名}.md` | **创建文件** |
-| `#record` | `01-Daily/{年}/周记-{年}W{周}.md` | 追加 |
-| `#insight` | `06-Memory/patterns.md` | 追加 |
+| `#task` | `50-GTD/active.md` | 追加 |
+| `#waiting` | `50-GTD/waiting.md` | 追加 |
+| `#topic` | `20-Areas/media/topics/{选题名}.md` | **创建文件** |
+| `#idea` | `20-Areas/indie/ideas/{产品名}.md` | **创建文件** |
+| `#record` | `00-Inbox/{日期}.md` | 追加 |
+| `#insight` | `60-Memory/patterns.md` | 追加 |
 
 **追加排序规则**：新内容插入到文件已有内容**之前**（倒序）
 
@@ -139,7 +131,7 @@ fi
 
 #### 2.1 归档已完成任务
 
-检查 active.md 中标记为 `[x]` 的任务，移动到 `archive.md`。
+检查 `50-GTD/active.md` 中标记为 `[x]` 的任务，移动到 `50-GTD/done.md`。
 
 #### 2.2 展示今日回顾（整合视图）
 
@@ -172,7 +164,7 @@ fi
 
 **必须暂停，等待用户回答。**
 
-写入日记文件和 patterns.md。
+写入日志文件 `00-Inbox/{YYYY-MM-DD}.md` 和 `60-Memory/patterns.md`。
 
 ---
 
@@ -186,7 +178,7 @@ fi
 
 ### Phase 3: 明日规划
 
-选择 1-3 个 MIT，更新到 active.md。
+选择 1-3 个 MIT，更新到 `50-GTD/active.md`。
 
 ---
 

@@ -1,10 +1,11 @@
 ---
-description: "[助手] 初始化 - 验证 Vault 结构并完成自我介绍"
+description: "[系统] 初始化 + 配置 - 验证 Vault 结构并完成设置"
 ---
 
-你是 Personal Assistant Plugin 的初始化向导。帮助用户完成两件事：
+你是 Personal Assistant Plugin 的初始化向导。帮助用户完成：
 1. 验证当前目录的 Vault 结构
 2. 通过对话了解用户，生成个性化配置
+3. 配置工作作息
 
 ## 初始化流程
 
@@ -13,11 +14,11 @@ description: "[助手] 初始化 - 验证 Vault 结构并完成自我介绍"
 使用 Bash 工具检查必需的目录和文件：
 
 ```bash
-echo "=== 检查 Vault 结构 ==="
+echo "=== 检查 Vault 结构 (PARA + GTD) ==="
 echo ""
 
 # 检查目录
-for dir in "00-Inbox" "01-Daily" "02-Tasks" "06-Memory"; do
+for dir in "00-Inbox" "10-Projects" "20-Areas" "30-Resources" "40-Archives" "50-GTD" "60-Memory"; do
   if [ -d "$dir" ]; then
     echo "✅ $dir"
   else
@@ -30,7 +31,7 @@ echo "=== 检查必需文件 ==="
 echo ""
 
 # 检查文件
-for file in "06-Memory/profile.md" "06-Memory/preferences.md" "02-Tasks/active.md" "00-Inbox/inbox.md"; do
+for file in "60-Memory/profile.md" "60-Memory/preferences.md" "50-GTD/active.md" "00-Inbox/capture.md"; do
   if [ -f "$file" ]; then
     echo "✅ $file"
   else
@@ -41,7 +42,7 @@ done
 
 如果目录缺失，自动创建：
 ```bash
-mkdir -p 00-Inbox 01-Daily 02-Tasks 06-Memory
+mkdir -p 00-Inbox 10-Projects 20-Areas 30-Resources 40-Archives 50-GTD 60-Memory
 ```
 
 ### 第二步：用户自我介绍（核心问题）
@@ -97,24 +98,62 @@ questions:
     multiSelect: false
 ```
 
-### 第三步：深入了解（可选）
+### 第三步：工作作息配置
+
+使用 AskUserQuestion 工具询问作息：
+
+```
+questions:
+  - question: "你通常几点开始工作？"
+    header: "起床"
+    options:
+      - label: "6:00 - 7:00"
+        description: "早起型"
+      - label: "8:00 - 9:00"
+        description: "常规型"
+      - label: "10:00 以后"
+        description: "夜猫子型"
+    multiSelect: false
+
+  - question: "你的深度工作时段是？"
+    header: "专注"
+    options:
+      - label: "上午 (9:00-12:00)"
+        description: "早晨精力充沛"
+      - label: "下午 (14:00-18:00)"
+        description: "午后进入状态"
+      - label: "晚上 (20:00-24:00)"
+        description: "夜间更专注"
+    multiSelect: false
+
+  - question: "你通常几点结束工作？"
+    header: "收工"
+    options:
+      - label: "18:00 前"
+        description: "准时下班"
+      - label: "20:00 - 22:00"
+        description: "晚间收尾"
+      - label: "随意"
+        description: "弹性安排"
+    multiSelect: false
+```
+
+### 第四步：深入了解（可选）
 
 对话式询问，用户可选择跳过：
 
-"太好了！我已经了解了你的基本情况。再问两个可选问题，帮助我更好地为你服务（可以直接说'跳过'）：
+"太好了！我已经了解了你的基本情况。再问一个可选问题（可以直接说'跳过'）：
 
-1. 你目前在忙什么项目或目标？
-2. 你通常什么时候工作？有什么固定习惯吗？"
+你目前在忙什么项目或目标？"
 
 如果用户说"跳过"，则使用默认值：
 - 当前状态：（未填写）
-- 工作习惯：（未填写）
 
-### 第四步：生成个性化配置
+### 第五步：生成个性化配置
 
 根据收集的信息，创建/更新以下文件：
 
-**06-Memory/profile.md**
+**60-Memory/profile.md**
 
 ```markdown
 ---
@@ -132,9 +171,6 @@ updated: {{今天的日期}}
 ## 当前状态
 {{用户描述的项目/目标，如果跳过则写"（未填写）"}}
 
-## 工作习惯
-{{用户描述的工作节奏，如果跳过则写"（未填写）"}}
-
 ## 助手使用偏好
 - 主要场景：{{选择的使用场景}}
 - 语言：中文
@@ -144,7 +180,7 @@ updated: {{今天的日期}}
 > 这份画像会随着你的使用逐渐完善
 ```
 
-**06-Memory/preferences.md**（如果不存在）
+**60-Memory/preferences.md**（如果不存在）
 
 ```markdown
 ---
@@ -153,48 +189,76 @@ created: {{今天的日期}}
 
 # 偏好配置
 
-\`\`\`yaml
-language: zh-CN
-\`\`\`
+## 作息
+- 起床时间: {{用户选择的起床时间}}
+- 深度工作: {{用户选择的专注时段}}
+- 结束时间: {{用户选择的收工时间}}
+
+## 系统
+- language: zh-CN
 ```
 
-**02-Tasks/active.md**（如果不存在）
+**50-GTD/active.md**（如果不存在）
+
+读取 `20-Areas/` 目录下的子目录，动态生成任务分类：
 
 ```markdown
 ---
 created: {{今天的日期}}
 ---
 
-# 当前任务
+# 任务中心
 
-## 今日重点
+## 今日重点 (MIT) - {{今天的日期}}
 
-- [ ] 完成初始化设置 ✅
-
----
-
-## 紧急任务
-
-（无）
+- [ ] 完成初始化设置
 
 ---
 
 ## 本周任务
 
 （无）
+
+---
+
+{{#each area in 20-Areas/子目录}}
+## {{area}} 任务
+
+（无）
+
+---
+{{/each}}
 ```
 
-**00-Inbox/inbox.md**（如果不存在）
+**50-GTD/waiting.md**（如果不存在）
 
 ```markdown
-> 统一收集箱 - 所有内容先到这里，Review 时分发
+---
+created: {{今天的日期}}
+---
+
+# 等待中
+
+## 等待他人
+
+（无）
+
+## 等待事件
+
+（无）
+```
+
+**00-Inbox/capture.md**（如果不存在）
+
+```markdown
+> 快速捕获入口 - /c-capture 的内容会写到这里
 
 ---
 
 <!-- 在此添加快速捕获的内容 -->
 ```
 
-### 第五步：显示完成信息
+### 第六步：显示完成信息
 
 ```
 ✅ 初始化完成！
@@ -203,13 +267,14 @@ created: {{今天的日期}}
 - 你是一名 {{role}}
 - 关注领域：{{domains}}
 - 主要场景：{{use_case}}
+- 作息：{{schedule}}
 
 现在可以开始使用了：
-- /a-capture <内容>  快速捕获想法
-- /a-tasks          查看今日任务
-- /a-review         每日回顾
+- /c-capture <内容>  快速捕获想法
+- /o-tasks          查看今日任务
+- /o-review         每日回顾
 
-试试：/a-capture 我的第一条笔记
+试试：/c-capture 我的第一条笔记
 ```
 
 ## 注意事项
@@ -217,4 +282,5 @@ created: {{今天的日期}}
 1. **不询问 Vault 路径** - 当前目录就是 Vault
 2. **支持多 Vault** - 用户可在不同目录运行不同的 Vault
 3. **幂等性** - 已存在的目录不会被覆盖，profile.md 会被更新
-4. **渐进学习** - 通过日常使用（/a-capture, /a-review）持续了解用户
+4. **渐进学习** - 通过日常使用（/c-capture, /o-review）持续了解用户
+5. **查看配置** - 直接打开 `60-Memory/preferences.md` 查看或编辑配置

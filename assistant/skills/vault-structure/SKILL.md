@@ -1,10 +1,10 @@
 ---
 name: Vault Structure
 description: This skill should be used when the user asks about "Obsidian Vault paths", "file locations", "task format", "frontmatter templates", or needs to navigate the personal knowledge base structure.
-version: 1.0.0
+version: 2.0.0
 ---
 
-# Vault 结构导航
+# Vault 结构导航 (CODE+ / PARA + GTD)
 
 ## Vault 根路径
 
@@ -16,37 +16,49 @@ version: 1.0.0
 
 ```
 📁 Vault/
-├── 00-Inbox/                    # 统一收集箱
-│   └── inbox.md                 # 所有捕获内容的统一入口
+├── 00-Inbox/                    # 统一收集箱 + 日志
+│   ├── capture.md               # 所有捕获内容的统一入口
+│   └── {YYYY-MM-DD}.md          # 日志 + 复盘（#record 归档位置）
 │
-├── 01-Daily/                    # 每日笔记
-│   ├── YYYY-MM-DD.md            # 日记文件
-│   └── {年}/
-│       └── 周记-{年}W{周数}.md  # #record 归档位置
+├── 10-Projects/                 # PARA: 短期项目（有截止日期）
 │
-├── 02-Tasks/                    # 任务中心
-│   ├── active.md                # #task 归档位置
-│   ├── someday.md               # 将来/也许
-│   ├── waiting.md               # 等待中
-│   └── archive/                 # 已完成归档
-│
-├── 03-Areas/                    # 领域
+├── 20-Areas/                    # PARA: 长期责任领域
 │   ├── media/                   # 自媒体
-│   │   ├── topics/              # 选题独立文件
+│   │   ├── topics/              # #topic 选题独立文件
 │   │   ├── 逐字稿/              # 逐字稿文件
 │   │   └── 方法论库/            # 方法论文件
-│   └── indie/                   # 独立开发
-│       └── ideas/               # #idea 产品想法文件
+│   ├── indie/                   # 独立开发
+│   │   └── ideas/               # #idea 产品想法文件
+│   └── outsourcing/             # 外包
 │
-├── 04-Projects/                 # 项目
+├── 30-Resources/                # PARA: 知识资源
 │
-├── 05-Knowledge/                # 知识库
+├── 40-Archives/                 # PARA: 归档（不活跃内容）
 │
-└── 06-Memory/                   # AI 记忆层
+├── 50-GTD/                      # GTD 任务管理
+│   ├── active.md                # #task 归档位置（含 MIT）
+│   ├── waiting.md               # #waiting 等待中（GTD Waiting For）
+│   ├── someday.md               # 将来/也许
+│   └── done.md                  # 已完成归档
+│
+└── 60-Memory/                   # AI 记忆层
     ├── profile.md               # 用户画像
-    ├── preferences.md           # 偏好配置
-    └── patterns.md              # #insight 归档位置
+    ├── preferences.md           # 偏好配置（含作息）
+    ├── patterns.md              # #insight 归档位置
+    └── weekly-summary/          # 周报
 ```
+
+## 目录编号说明
+
+| 编号 | 目录 | 说明 |
+|------|------|------|
+| 00 | Inbox | 统一入口 |
+| 10 | Projects | 短期项目 |
+| 20 | Areas | 长期领域 |
+| 30 | Resources | 知识资源 |
+| 40 | Archives | 归档 |
+| 50 | GTD | 任务管理 |
+| 60 | Memory | AI 记忆 |
 
 ## Obsidian Tasks 格式
 
