@@ -2,8 +2,8 @@
 # Load user context at session start
 # 根据 CLAUDE.md 的"快速上下文"要求加载三个文件
 
-# 使用 CLAUDE_PLUGIN_ROOT 环境变量（由 Claude Code 提供）
-CONFIG_FILE="${CLAUDE_PLUGIN_ROOT}/.config/settings.sh"
+# 使用全局配置位置（不依赖 CLAUDE_PLUGIN_ROOT）
+CONFIG_FILE="$HOME/.claude/plugins/config/assistant/settings.sh"
 
 if [ ! -f "$CONFIG_FILE" ]; then
     echo "╔══════════════════════════════════════════════════════════╗"

@@ -5,6 +5,24 @@ argument-hint: "[可选：主题]"
 
 进入脑暴倾倒模式，让用户自由表达，结束时提取有价值的内容。
 
+## 前置检查
+
+先加载配置获取 Vault 路径：
+
+```bash
+if [ -f ~/.claude/plugins/config/assistant/settings.sh ]; then
+    source ~/.claude/plugins/config/assistant/settings.sh
+    echo "Vault: $VAULT_PATH"
+else
+    echo "ERROR: 未配置。请先运行 /a-setup"
+    exit 1
+fi
+```
+
+如果未配置，停止执行并提示用户运行 `/a-setup`。
+
+以下所有文件路径都以 `$VAULT_PATH` 为前缀。
+
 ## 模式说明
 
 这是一个自由对话模式，用户可以：

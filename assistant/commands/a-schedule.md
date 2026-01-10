@@ -4,6 +4,24 @@ description: "[助手] 作息状态 - 当前时段提醒 + 断更检测 + 惩罚
 
 检查当前作息状态，提醒当前时段任务，检测断更天数。
 
+## 前置检查
+
+先加载配置获取 Vault 路径：
+
+```bash
+if [ -f ~/.claude/plugins/config/assistant/settings.sh ]; then
+    source ~/.claude/plugins/config/assistant/settings.sh
+    echo "Vault: $VAULT_PATH"
+else
+    echo "ERROR: 未配置。请先运行 /a-setup"
+    exit 1
+fi
+```
+
+如果未配置，停止执行并提示用户运行 `/a-setup`。
+
+以下所有文件路径都以 `$VAULT_PATH` 为前缀。
+
 ## 执行流程
 
 ### Phase 1: 读取作息配置

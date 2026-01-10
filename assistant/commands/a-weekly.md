@@ -4,6 +4,24 @@ description: "[助手] 每周整合 - 扫描本周内容，生成周报"
 
 进行每周整合，扫描本周的记录并生成周报。
 
+## 前置检查
+
+先加载配置获取 Vault 路径：
+
+```bash
+if [ -f ~/.claude/plugins/config/assistant/settings.sh ]; then
+    source ~/.claude/plugins/config/assistant/settings.sh
+    echo "Vault: $VAULT_PATH"
+else
+    echo "ERROR: 未配置。请先运行 /a-setup"
+    exit 1
+fi
+```
+
+如果未配置，停止执行并提示用户运行 `/a-setup`。
+
+以下所有文件路径都以 `$VAULT_PATH` 为前缀。
+
 ## 执行步骤
 
 ### 1. 读取本周数据

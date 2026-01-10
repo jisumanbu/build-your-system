@@ -1,8 +1,24 @@
 ---
-description: "[助手] 系统状态检查 - 验证 MCP 连接和 Vault 结构"
+description: "[助手] 系统状态检查 - 验证配置和 Vault 结构"
 ---
 
 检查 AI 助手系统状态。
+
+## 前置检查
+
+先加载配置获取 Vault 路径：
+
+```bash
+if [ -f ~/.claude/plugins/config/assistant/settings.sh ]; then
+    source ~/.claude/plugins/config/assistant/settings.sh
+    echo "Vault: $VAULT_PATH"
+else
+    echo "ERROR: 未配置。请先运行 /a-setup"
+    exit 1
+fi
+```
+
+如果未配置，停止执行并提示用户运行 `/a-setup`。
 
 ## 检查项
 

@@ -4,6 +4,24 @@ description: "[助手] 任务概览 - 显示当前任务状态和智能建议"
 
 显示任务概览并提供智能建议。
 
+## 前置检查
+
+先加载配置获取 Vault 路径：
+
+```bash
+if [ -f ~/.claude/plugins/config/assistant/settings.sh ]; then
+    source ~/.claude/plugins/config/assistant/settings.sh
+    echo "Vault: $VAULT_PATH"
+else
+    echo "ERROR: 未配置。请先运行 /a-setup"
+    exit 1
+fi
+```
+
+如果未配置，停止执行并提示用户运行 `/a-setup`。
+
+以下所有文件路径都以 `$VAULT_PATH` 为前缀。
+
 ## 执行步骤
 
 ### 0. 时段提示（置顶）

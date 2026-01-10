@@ -4,6 +4,24 @@ description: "[助手] 每日回顾 - inbox 分发 + GRAI 复盘 + 明日规划"
 
 进行每日回顾，包含 inbox 分发、复盘（GRAI + 4Fs 融合）和明日规划。
 
+## 前置检查
+
+先加载配置获取 Vault 路径：
+
+```bash
+if [ -f ~/.claude/plugins/config/assistant/settings.sh ]; then
+    source ~/.claude/plugins/config/assistant/settings.sh
+    echo "Vault: $VAULT_PATH"
+else
+    echo "ERROR: 未配置。请先运行 /a-setup"
+    exit 1
+fi
+```
+
+如果未配置，停止执行并提示用户运行 `/a-setup`。
+
+以下所有文件路径都以 `$VAULT_PATH` 为前缀。
+
 ## 文件结构
 
 参考 vault-structure skill 获取完整目录结构。

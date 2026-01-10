@@ -65,13 +65,18 @@ done
 VAULT_PATH="用户提供的路径"
 ```
 
-写入到: `~/.claude/plugins/local/personal-assistant/.config/settings.sh`
+先创建目录（如不存在）：
+```bash
+mkdir -p ~/.claude/plugins/config/assistant
+```
+
+写入到: `~/.claude/plugins/config/assistant/settings.sh`
 
 ### 第六步：验证设置
 
 运行验证：
 ```bash
-source ~/.claude/plugins/local/personal-assistant/.config/settings.sh
+source ~/.claude/plugins/config/assistant/settings.sh
 echo "Vault 路径: $VAULT_PATH"
 ls "$VAULT_PATH/00-Inbox/inbox.md" && echo "✅ 配置成功"
 ```

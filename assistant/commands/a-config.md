@@ -4,9 +4,25 @@ description: "[助手] 配置管理 - 查看系统配置"
 
 查看 AI 助手系统配置。
 
+## 前置检查
+
+先加载配置获取 Vault 路径：
+
+```bash
+if [ -f ~/.claude/plugins/config/assistant/settings.sh ]; then
+    source ~/.claude/plugins/config/assistant/settings.sh
+    echo "Vault: $VAULT_PATH"
+else
+    echo "ERROR: 未配置。请先运行 /a-setup"
+    exit 1
+fi
+```
+
+如果未配置，停止执行并提示用户运行 `/a-setup`。
+
 ## 执行步骤
 
-读取 `06-Memory/preferences.md`，格式化显示：
+读取 `$VAULT_PATH/06-Memory/preferences.md`，格式化显示：
 
 ```
 === AI 助手配置 ===
@@ -24,4 +40,4 @@ description: "[助手] 配置管理 - 查看系统配置"
 - #learning - 学习
 ```
 
-如需修改配置，直接编辑 `06-Memory/preferences.md` 文件。
+如需修改配置，直接编辑 `$VAULT_PATH/06-Memory/preferences.md` 文件。
