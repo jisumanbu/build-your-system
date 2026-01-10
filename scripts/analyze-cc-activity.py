@@ -24,7 +24,22 @@ from pathlib import Path
 from typing import List, Dict, Optional, Set, Tuple
 
 # 配置
-VAULT = Path(os.environ.get('VAULT_PATH', '/Users/jliu/Library/Mobile Documents/iCloud~md~obsidian/Documents/Obsidian Vault'))
+# 从环境变量或 plugin 配置读取 VAULT_PATH
+VAULT_PATH_ENV = os.environ.get('VAULT_PATH')
+if not VAULT_PATH_ENV:
+    # 尝试从 plugin 配置读取
+    config_file = Path(__file__).parent.parent / '.config' / 'settings.sh'
+    if config_file.exists():
+        with open(config_file) as f:
+            for line in f:
+                if line.startswith('VAULT_PATH='):
+                    VAULT_PATH_ENV = line.split('=', 1)[1].strip().strip('"').strip("'")
+                    break
+    if not VAULT_PATH_ENV:
+        print("Error: VAULT_PATH not set. Please run /a-setup first.", file=sys.stderr)
+        sys.exit(1)
+
+VAULT = Path(VAULT_PATH_ENV)
 CLAUDE_HOME = Path.home() / '.claude'
 PROJECTS_DIR = CLAUDE_HOME / 'projects'
 ACTIVE_FILE = VAULT / '02-Tasks/active.md'

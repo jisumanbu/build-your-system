@@ -25,7 +25,7 @@ description: "[助手] 系统状态检查 - 验证 MCP 连接和 Vault 结构"
 检查以下文件是否存在：
 - 06-Memory/profile.md
 - 06-Memory/preferences.md
-- 02-Tasks/inbox.md
+- 00-Inbox/inbox.md
 
 ## 输出格式
 

@@ -8,9 +8,7 @@ version: 1.0.0
 
 ## Vault 根路径
 
-```
-/Users/jliu/Library/Mobile Documents/iCloud~md~obsidian/Documents/Obsidian Vault
-```
+从 `.config/settings.sh` 配置读取 `VAULT_PATH`。
 
 环境变量：`${VAULT_PATH}`
 
@@ -19,8 +17,7 @@ version: 1.0.0
 ```
 📁 Vault/
 ├── 00-Inbox/                    # 统一收集箱
-│   ├── inbox.md                 # 所有捕获内容的统一入口
-│   └── quick-capture.md         # #idea 归档位置
+│   └── inbox.md                 # 所有捕获内容的统一入口
 │
 ├── 01-Daily/                    # 每日笔记
 │   ├── YYYY-MM-DD.md            # 日记文件
@@ -39,7 +36,7 @@ version: 1.0.0
 │   │   ├── 逐字稿/              # 逐字稿文件
 │   │   └── 方法论库/            # 方法论文件
 │   └── indie/                   # 独立开发
-│       └── ideas/               # 产品想法文件
+│       └── ideas/               # #idea 产品想法文件
 │
 ├── 04-Projects/                 # 项目
 │

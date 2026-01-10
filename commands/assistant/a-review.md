@@ -10,10 +10,10 @@ description: "[助手] 每日回顾 - inbox 分发 + GRAI 复盘 + 明日规划"
 
 核心文件：
 - `00-Inbox/inbox.md` - 统一收集箱
-- `00-Inbox/quick-capture.md` - #idea 归档位置
 - `01-Daily/{年}/周记-{年}W{周}.md` - #record 归档位置
 - `02-Tasks/active.md` - #task 归档位置
 - `03-Areas/media/topics/` - #topic 独立文件目录
+- `03-Areas/indie/ideas/` - #idea 独立文件目录
 - `06-Memory/patterns.md` - #insight 归档位置
 
 ## 执行流程
@@ -105,7 +105,7 @@ description: "[助手] 每日回顾 - inbox 分发 + GRAI 复盘 + 明日规划"
 |----------|----------|----------|
 | `#task` | `02-Tasks/active.md` | 追加 |
 | `#topic` | `03-Areas/media/topics/{选题名}.md` | **创建文件** |
-| `#idea` | `00-Inbox/quick-capture.md` | 追加 |
+| `#idea` | `03-Areas/indie/ideas/{产品名}.md` | **创建文件** |
 | `#record` | `01-Daily/{年}/周记-{年}W{周}.md` | 追加 |
 | `#insight` | `06-Memory/patterns.md` | 追加 |
 

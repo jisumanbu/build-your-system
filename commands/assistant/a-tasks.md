@@ -45,7 +45,7 @@ description: "[助手] 任务概览 - 显示当前任务状态和智能建议"
 ### 1. 读取任务文件
 
 读取以下文件：
-- `02-Tasks/inbox.md` - 待处理任务
+- `00-Inbox/inbox.md` - 待处理任务
 - `02-Tasks/active.md` - 活跃任务
 
 ### 2. 解析任务

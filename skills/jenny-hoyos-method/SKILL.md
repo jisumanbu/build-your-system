@@ -82,12 +82,7 @@ Hook 必须在 3 秒内完成：
 
 ## 参考资料
 
-详细方法论见：
-- `references/hook-formulas.md` - 钩子公式集
-- `references/structure-templates.md` - 结构模板集
-- `references/pacing-formula.md` - 节奏公式
-
-或 Vault 中的方法论库：
+详细方法论见 Vault 中的方法论库：
 - `03-Areas/media/方法论库/jenny-hoyos.md`
 - `03-Areas/media/方法论库/hook-formulas.md`
 - `03-Areas/media/方法论库/structure-templates.md`
