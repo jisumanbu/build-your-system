@@ -9,13 +9,20 @@ argument-hint: "<内容>"
 
 ## 执行流程
 
+### 0. 检查初始化状态
+
+先检查 `60-Memory/profile.md` 是否存在。如果不存在，提示用户先运行 `/a-setup` 完成初始化，然后停止执行。
+
 ### 1. 分析内容，识别标签
 
-**使用 capture-rules skill 中的统一规则进行识别。**
+**类型标签**：使用 capture-rules skill 中的统一规则。
+
+**领域标签**：读取 `60-Memory/tag-mapping.md` 获取用户配置的领域标签和关键词。
+- 如果 tag-mapping.md 不存在，使用默认领域标签（media, indie, outsourcing, life, learning）
 
 识别顺序：
 1. 类型标签（必选1个）：优先显式标签，其次关键词触发
-2. 领域标签（可选，可叠加）
+2. 领域标签（可选，可叠加）：根据 tag-mapping.md 中的关键词识别
 3. 状态标签（可选）
 
 ### 2. 写入 `00-Inbox/capture.md`

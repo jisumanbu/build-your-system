@@ -56,12 +56,17 @@ version: 1.0.0
 
 | 类型标签 | 目标位置 |
 |----------|----------|
-| #task | `02-Tasks/active.md` |
-| #topic | `03-Areas/media/topics/{选题名}.md` |
-| #idea | `03-Areas/indie/ideas/{产品名}.md` |
-| #record | `01-Daily/{年}/周记-{年}W{周}.md` |
-| #insight | `06-Memory/patterns.md` |
+| #task | `50-GTD/active.md` |
+| #waiting | `50-GTD/waiting.md` |
+| #topic | `20-Areas/media/topics/{选题名}.md` |
+| #idea | `20-Areas/indie/ideas/{产品名}.md` |
+| #record | `00-Inbox/{日期}.md` |
+| #insight | `60-Memory/patterns.md` |
 
-## 参考资料
+## 领域标签配置
 
-详细的关键词映射表见 `references/tag-mapping.md`
+领域标签根据用户在 `/a-setup` 时选择的关注领域动态生成。
+
+配置存储位置：`60-Memory/tag-mapping.md`
+
+如果该文件不存在，使用默认领域标签。

@@ -12,31 +12,38 @@ for dir in "${REQUIRED_DIRS[@]}"; do
     fi
 done
 
-# 检查必需文件
-REQUIRED_FILES=("60-Memory/profile.md" "60-Memory/preferences.md" "50-GTD/active.md" "00-Inbox/capture.md")
-MISSING_FILES=()
-
-for file in "${REQUIRED_FILES[@]}"; do
-    if [ ! -f "$file" ]; then
-        MISSING_FILES+=("$file")
+# 检查必需文件 - profile.md 是 setup 完成的标志
+SETUP_COMPLETE=false
+if [ -f "60-Memory/profile.md" ]; then
+    # 检查 profile.md 是否有实际内容（不只是模板）
+    if grep -q "称呼：" "60-Memory/profile.md" 2>/dev/null; then
+        SETUP_COMPLETE=true
     fi
-done
+fi
 
-# 如果缺失关键内容，提示运行 setup
-if [ ${#MISSING_DIRS[@]} -gt 0 ] || [ ${#MISSING_FILES[@]} -gt 0 ]; then
+# 如果缺失目录或未完成 setup，触发引导
+if [ ${#MISSING_DIRS[@]} -gt 0 ] || [ "$SETUP_COMPLETE" = false ]; then
     echo "╔══════════════════════════════════════════════════════════╗"
     echo "║  Personal Assistant Plugin (CODE+)                       ║"
     echo "╚══════════════════════════════════════════════════════════╝"
+    echo ""
+    echo "【系统状态：未初始化】"
     echo ""
 
     if [ ${#MISSING_DIRS[@]} -gt 0 ]; then
         echo "缺失目录: ${MISSING_DIRS[*]}"
     fi
-    if [ ${#MISSING_FILES[@]} -gt 0 ]; then
-        echo "缺失文件: ${MISSING_FILES[*]}"
+
+    if [ "$SETUP_COMPLETE" = false ]; then
+        echo "用户画像: 未配置"
     fi
     echo ""
-    echo "运行 /a-setup 初始化 Vault 结构并完成自我介绍"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo "【重要】检测到首次使用，请立即运行 /a-setup 完成初始化。"
+    echo "初始化后才能使用完整功能（如 /c-capture, /o-tasks 等）。"
+    echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+    echo ""
+    echo "Claude: 你应该主动告诉用户需要先完成初始化，并询问是否现在运行 /a-setup"
     exit 0
 fi
 
