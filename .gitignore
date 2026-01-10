@@ -1,0 +1,13 @@
+# User-specific configuration (contains personal paths)
+.config/settings.sh
+
+# macOS
+.DS_Store
+
+# Editor
+*.swp
+*.swo
+*~
+
+# Logs
+*.log

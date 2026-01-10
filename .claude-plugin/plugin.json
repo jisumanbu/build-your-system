@@ -1,0 +1,16 @@
+{
+  "name": "personal-assistant",
+  "version": "3.0.0",
+  "description": "Personal AI assistant for task management, knowledge management, and media content creation",
+  "author": {
+    "name": "jliu"
+  },
+  "keywords": [
+    "productivity",
+    "obsidian",
+    "media",
+    "content-creation",
+    "task-management",
+    "gtd"
+  ]
+}
