@@ -8,9 +8,9 @@ version: 1.0.0
 
 ## Vault 根路径
 
-从 `.config/settings.sh` 配置读取 `VAULT_PATH`。
+**当前工作目录即为 Vault 根目录。**
 
-环境变量：`${VAULT_PATH}`
+所有命令使用相对路径，用户可以在不同的 Vault 目录运行 Claude Code。
 
 ## 目录结构
 

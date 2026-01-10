@@ -1,6 +1,3 @@
-# User-specific configuration (contains personal paths)
-assistant/.config/settings.sh
-
 # macOS
 .DS_Store
 

@@ -22,7 +22,7 @@ fi
 
 ## 执行步骤
 
-读取 `$VAULT_PATH/06-Memory/preferences.md`，格式化显示：
+读取 `06-Memory/preferences.md`，格式化显示：
 
 ```
 === AI 助手配置 ===
@@ -40,4 +40,4 @@ fi
 - #learning - 学习
 ```
 
-如需修改配置，直接编辑 `$VAULT_PATH/06-Memory/preferences.md` 文件。
+如需修改配置，直接编辑 `06-Memory/preferences.md` 文件。

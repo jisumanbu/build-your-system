@@ -1,59 +1,68 @@
 #!/bin/bash
 # Load user context at session start
-# 根据 CLAUDE.md 的"快速上下文"要求加载三个文件
+# 检测当前目录是否是有效 Vault，加载用户上下文
 
-# 使用全局配置位置（不依赖 CLAUDE_PLUGIN_ROOT）
-CONFIG_FILE="$HOME/.claude/plugins/config/assistant/settings.sh"
+# 检查必需目录
+REQUIRED_DIRS=("00-Inbox" "02-Tasks" "06-Memory")
+MISSING_DIRS=()
 
-if [ ! -f "$CONFIG_FILE" ]; then
+for dir in "${REQUIRED_DIRS[@]}"; do
+    if [ ! -d "$dir" ]; then
+        MISSING_DIRS+=("$dir")
+    fi
+done
+
+# 检查必需文件
+REQUIRED_FILES=("06-Memory/profile.md" "06-Memory/preferences.md" "02-Tasks/active.md" "00-Inbox/inbox.md")
+MISSING_FILES=()
+
+for file in "${REQUIRED_FILES[@]}"; do
+    if [ ! -f "$file" ]; then
+        MISSING_FILES+=("$file")
+    fi
+done
+
+# 如果缺失关键内容，提示运行 setup
+if [ ${#MISSING_DIRS[@]} -gt 0 ] || [ ${#MISSING_FILES[@]} -gt 0 ]; then
     echo "╔══════════════════════════════════════════════════════════╗"
-    echo "║  🚀 首次使用 Personal Assistant Plugin                    ║"
-    echo "║                                                          ║"
-    echo "║  请运行 /a-setup 完成初始化配置                           ║"
+    echo "║  Personal Assistant Plugin                               ║"
     echo "╚══════════════════════════════════════════════════════════╝"
     echo ""
-    echo "设置向导将帮助你："
-    echo "  1. 配置 Obsidian Vault 路径"
-    echo "  2. 检查必需的目录结构"
-    echo "  3. 创建示例配置文件"
+
+    if [ ${#MISSING_DIRS[@]} -gt 0 ]; then
+        echo "缺失目录: ${MISSING_DIRS[*]}"
+    fi
+    if [ ${#MISSING_FILES[@]} -gt 0 ]; then
+        echo "缺失文件: ${MISSING_FILES[*]}"
+    fi
     echo ""
-    echo "👉 输入 /a-setup 开始"
+    echo "运行 /a-setup 初始化 Vault 结构并完成自我介绍"
     exit 0
 fi
 
-source "$CONFIG_FILE"
-VAULT="$VAULT_PATH"
-
-# 验证 Vault 路径是否有效
-if [ ! -d "$VAULT" ]; then
-    echo "❌ Vault 路径无效: $VAULT"
-    echo ""
-    echo "请运行 /a-setup 重新配置"
-    exit 0
-fi
-
+# 加载上下文
 echo "## 快速上下文加载"
 echo ""
 
 # 1. 读取用户画像
-if [ -f "$VAULT/06-Memory/profile.md" ]; then
-  echo "### 用户画像"
-  head -30 "$VAULT/06-Memory/profile.md" | tail -n +2
-  echo ""
+if [ -f "06-Memory/profile.md" ]; then
+    echo "### 用户画像"
+    head -30 "06-Memory/profile.md" | tail -n +2
+    echo ""
 fi
 
 # 2. 读取偏好配置（提取关键设置）
-if [ -f "$VAULT/06-Memory/preferences.md" ]; then
-  echo "### 偏好配置"
-  sed -n '/```yaml/,/```/p' "$VAULT/06-Memory/preferences.md" | grep -E "language" || echo "使用默认配置"
-  echo ""
+if [ -f "06-Memory/preferences.md" ]; then
+    echo "### 偏好配置"
+    sed -n '/```yaml/,/```/p' "06-Memory/preferences.md" | grep -E "language" || echo "使用默认配置"
+    echo ""
 fi
 
 # 3. 读取当前任务（今日重点）
-if [ -f "$VAULT/02-Tasks/active.md" ]; then
-  echo "### 今日重点 (MIT)"
-  sed -n '/## 今日重点/,/^---/p' "$VAULT/02-Tasks/active.md" | head -10
-  echo ""
+if [ -f "02-Tasks/active.md" ]; then
+    echo "### 今日重点 (MIT)"
+    sed -n '/## 今日重点/,/^---/p' "02-Tasks/active.md" | head -10
+    echo ""
 fi
 
 # 输出当前时间（GMT+8）
