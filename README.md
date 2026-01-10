@@ -13,16 +13,23 @@
 
 ## 安装
 
-### 方式一：Git Clone（推荐）
+### 方式一：Claude Code Marketplace（推荐）
+
+```bash
+# 在 Claude Code 中运行
+/install-plugin jisumanbu/personal-assistant-plugin
+```
+
+### 方式二：Git Clone
 
 ```bash
 git clone https://github.com/jisumanbu/personal-assistant-plugin.git \
   ~/.claude/plugins/local/personal-assistant
 ```
 
-### 方式二：手动下载
+### 方式三：手动下载
 
-1. 下载本仓库
+1. 从 [GitHub](https://github.com/jisumanbu/personal-assistant-plugin) 下载
 2. 解压到 `~/.claude/plugins/local/personal-assistant/`
 
 ## 首次设置
