@@ -16,7 +16,7 @@
 ### 方式一：Git Clone（推荐）
 
 ```bash
-git clone https://github.com/[your-username]/personal-assistant-plugin.git \
+git clone https://github.com/jisumanbu/personal-assistant-plugin.git \
   ~/.claude/plugins/local/personal-assistant
 ```
 
