@@ -18,7 +18,7 @@ argument-hint: "<内容>"
 **类型标签**：使用 capture-rules skill 中的统一规则。
 
 **领域标签**：读取 `60-Memory/tag-mapping.md` 获取用户配置的领域标签和关键词。
-- 如果 tag-mapping.md 不存在，使用默认领域标签（media, indie, outsourcing, life, learning）
+- 如果 tag-mapping.md 不存在，使用默认领域标签（work, life, learning）
 
 识别顺序：
 1. 类型标签（必选1个）：优先显式标签，其次关键词触发

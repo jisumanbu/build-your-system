@@ -21,6 +21,9 @@ version: 2.0.0
 │   └── {YYYY-MM-DD}.md          # 日志 + 复盘（#record 归档位置）
 │
 ├── 10-Projects/                 # PARA: 短期项目（有截止日期）
+│   ├── {项目名}.md              # 项目文件（单文件项目）
+│   └── {项目名}/                # 项目目录（复杂项目）
+│       └── README.md            # 项目主文件
 │
 ├── 20-Areas/                    # PARA: 长期责任领域
 │   ├── media/                   # 自媒体
@@ -63,8 +66,19 @@ version: 2.0.0
 ## Obsidian Tasks 格式
 
 ```markdown
-- [ ] 任务描述 📅 YYYY-MM-DD ⏫
+- [ ] 任务描述 [[项目名]] #领域 📅 YYYY-MM-DD ⏫
 ```
+
+### 任务格式组成
+
+| 部分 | 格式 | 必选 | 说明 |
+|------|------|------|------|
+| 复选框 | `- [ ]` / `- [x]` | ✓ | 任务状态 |
+| 描述 | 文本 | ✓ | 任务内容 |
+| 项目关联 | `[[项目名]]` | 可选 | 链接到 10-Projects |
+| 领域标签 | `#media` / `#indie` 等 | 可选 | 分类用途 |
+| 截止日期 | `📅 YYYY-MM-DD` | 可选 | Obsidian Tasks 识别 |
+| 优先级 | `⏫` / `🔼` / `🔽` | 可选 | 排序用途 |
 
 ### Emoji 含义
 
@@ -78,6 +92,23 @@ version: 2.0.0
 | 🔽 | 低优先级 |
 | 🔁 | 循环任务 |
 | ✅ | 完成日期 |
+
+## 项目文件格式
+
+**Frontmatter**：
+
+```yaml
+---
+status: active | paused | completed
+created: YYYY-MM-DD
+target: YYYY-MM-DD  # 可选
+area: indie | media | outsourcing  # 关联领域
+---
+```
+
+**状态流**：`active → paused → completed → 移动到 40-Archives/`
+
+详见 `references/file-templates.md`
 
 ## Frontmatter 模板
 

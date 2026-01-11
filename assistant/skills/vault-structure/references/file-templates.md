@@ -1,5 +1,69 @@
 # 文件模板集
 
+## 项目文件模板（新增）
+
+位置：`10-Projects/{项目名}.md` 或 `10-Projects/{项目名}/README.md`
+
+```yaml
+---
+status: active | paused | completed
+created: YYYY-MM-DD
+target: YYYY-MM-DD  # 可选，预期完成日期
+area: indie | media | outsourcing | life | learning  # 关联领域
+tags: [project]
+---
+
+# 项目名称
+
+## 目标
+
+一句话描述项目要达成的目标。
+
+## 背景
+
+项目启动的原因和背景。
+
+## 关键成果
+
+- [ ] 关键成果 1
+- [ ] 关键成果 2
+- [ ] 关键成果 3
+
+## 任务
+
+> 任务可在此列出，也可在 `50-GTD/active.md` 中使用 `[[项目名]]` 关联
+
+- [ ] 任务 1 📅 YYYY-MM-DD
+- [ ] 任务 2
+
+## 进度记录
+
+### YYYY-MM-DD
+
+- 完成了...
+- 下一步...
+
+## 相关资源
+
+- [[相关文档1]]
+- [[相关文档2]]
+```
+
+**状态说明**：
+
+| 状态 | 说明 |
+|------|------|
+| active | 正在进行中 |
+| paused | 暂停（有明确原因） |
+| completed | 已完成，待归档 |
+
+**生命周期**：
+```
+active → paused → active → completed → (移动到 40-Archives/{项目名}/)
+```
+
+---
+
 ## 选题文件模板
 
 位置：`20-Areas/media/topics/{选题名}.md`
