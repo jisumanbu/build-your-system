@@ -24,6 +24,7 @@ argument-hint: "[YYYY-MM-DD]"
 **识别规则**：参考 capture-rules skill
 
 **默认分发规则**：
+
 | 类型 | 目标 |
 |------|------|
 | #task | `50-GTD/active.md` 追加 |
@@ -60,6 +61,7 @@ argument-hint: "[YYYY-MM-DD]"
 📊 活动时段：{开始} - {结束} (GMT+8)
 
 🎯 MIT vs 实际：
+
 | MIT 计划 | 状态 | 实际投入 |
 |----------|------|----------|
 | ... | ✅/⏸️ | 来自前置数据 |
