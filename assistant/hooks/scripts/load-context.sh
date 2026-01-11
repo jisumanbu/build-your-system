@@ -15,8 +15,9 @@ done
 # 检查必需文件 - profile.md 是 setup 完成的标志
 SETUP_COMPLETE=false
 if [ -f "60-Memory/profile.md" ]; then
-    # 检查 profile.md 是否有实际内容（不只是模板）
-    if grep -q "称呼：" "60-Memory/profile.md" 2>/dev/null; then
+    # 检查 profile.md 是否有实际内容（文件超过 5 行即视为已配置）
+    LINE_COUNT=$(wc -l < "60-Memory/profile.md" 2>/dev/null | tr -d ' ')
+    if [ "$LINE_COUNT" -gt 5 ]; then
         SETUP_COMPLETE=true
     fi
 fi
