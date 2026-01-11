@@ -47,7 +47,7 @@
 ```
 Capture  →  Organize  →  Distill  →  Express
   ↓           ↓           ↓           ↓
- 捕获        组织        提炼        输出
+ 捕获        组织         提炼         输出
 ```
 
 | 阶段 | 命令前缀 | 核心命令 |
@@ -102,29 +102,33 @@ Inbox → Active (MIT) → Done
 ```
 assistant/
 ├── .claude-plugin/
-│   └── plugin.json         # 插件元数据 (v3.1.0)
-├── commands/               # 用户命令
-│   ├── c-capture.md        # 快速捕获
-│   ├── c-dump.md           # 脑暴倾倒
-│   ├── o-tasks.md          # 任务概览
-│   ├── o-review.md         # 每日回顾 (核心)
-│   ├── o-weekly.md         # 每周整合
-│   ├── o-schedule.md       # 作息状态
-│   ├── d-distill.md        # 渐进式总结
-│   ├── d-mine.md           # 选题挖矿
-│   ├── e-director.md       # 内容创作全流程
-│   ├── e-export.md         # 导出对话
-│   ├── a-setup.md          # 初始化设置
-│   └── cc-activity.md      # 活动分析
-├── skills/                 # 知识库
-│   ├── capture-rules/      # 捕获识别规则
-│   └── vault-structure/    # Vault 结构说明
+│   └── plugin.json              # 插件元数据 (v1.0.0)
+├── commands/                    # 用户命令
+│   ├── c-capture.md             # 快速捕获
+│   ├── c-dump.md                # 脑暴倾倒
+│   ├── o-tasks.md               # 任务概览
+│   ├── o-review.md              # 每日回顾 (核心)
+│   ├── o-weekly.md              # 每周整合
+│   ├── o-schedule.md            # 作息状态
+│   ├── d-distill.md             # 渐进式总结
+│   ├── d-mine.md                # 选题挖矿
+│   ├── e-director.md            # 内容创作全流程
+│   ├── e-export.md              # 导出对话
+│   ├── a-setup.md               # 初始化设置
+│   └── cc-activity.md           # 活动分析
+├── skills/                      # 知识库
+│   ├── capture-rules/
+│   │   └── SKILL.md             # 捕获识别规则
+│   └── vault-structure/
+│       ├── SKILL.md             # Vault 结构说明
+│       └── references/
+│           └── file-templates.md
 ├── hooks/
-│   ├── hooks.json          # Hook 配置
+│   ├── hooks.json               # Hook 配置
 │   └── scripts/
-│       └── load-context.sh # SessionStart 加载上下文
+│       └── load-context.sh      # SessionStart 加载上下文
 └── scripts/
-    └── analyze-cc-activity.py  # 分析 Claude Code 活动
+    └── analyze-cc-activity.py   # 分析 Claude Code 活动
 ```
 
 ### 关键设计决策
@@ -135,10 +139,15 @@ assistant/
 
 ```bash
 # 检测 Vault 是否已初始化
-if profile.md 行数 > 5:
-    加载用户画像、偏好、今日 MIT
-else:
-    引导用户运行 /a-setup
+LINE_COUNT=$(wc -l < "60-Memory/profile.md" 2>/dev/null | tr -d ' ')
+if [ "$LINE_COUNT" -gt 5 ]; then
+    # 加载用户画像、偏好、今日 MIT
+    head -30 "60-Memory/profile.md"
+    sed -n '/## 今日重点/,/^---/p' "50-GTD/active.md"
+else
+    # 引导用户运行 /a-setup
+    echo "【重要】请运行 /a-setup 完成初始化"
+fi
 ```
 
 **价值**：AI 立即了解你是谁、你在做什么，无需每次重复说明。
@@ -184,6 +193,8 @@ else:
 
 1. **安装插件**
    ```bash
+   # 创建插件目录（如果不存在）
+   mkdir -p ~/.claude/plugins
    cd ~/.claude/plugins
    git clone https://github.com/jisumanbu/build-your-system.git
    ```
@@ -249,9 +260,9 @@ else:
 
 ## 开发路线图
 
-### 已完成 (v3.1.0)
+### 已完成 (v1.0.0)
 
-- [x] CODE+ 命令前缀重构
+- [x] CODE+ 命令前缀重构（Capture/Organize/Distill/Express）
 - [x] PARA+GTD 目录结构
 - [x] SessionStart 自动上下文加载
 - [x] 动态领域标签配置
