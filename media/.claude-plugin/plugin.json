@@ -1,0 +1,7 @@
+{
+  "name": "media",
+  "version": "3.0.0",
+  "description": "短视频创作助手 - 选题评估、Hook 设计、逐字稿生成。基于 Jenny Hoyos 方法论的完整视频创作流程。",
+  "commands": "./commands",
+  "skills": "./skills"
+}
