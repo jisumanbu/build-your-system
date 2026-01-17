@@ -12,7 +12,7 @@ description: "[Organize] 刷新 Dashboard - 更新统计、趋势、洞察数据
 
 运行 Python 脚本获取今日活动统计：
 
-!`python3 "${CLAUDE_PLUGIN_ROOT}/assistant/scripts/analyze-cc-activity.py"`
+!`python3 "${CLAUDE_PLUGIN_ROOT}/scripts/analyze-cc-activity.py"`
 
 **提取数据**：
 - 活动时段（开始-结束时间）
