@@ -1,0 +1,7 @@
+{
+  "name": "assistant",
+  "version": "1.0.0",
+  "description": "个人 AI 助手 - 任务管理、知识管理、每日回顾。基于 Obsidian Vault 的统一收集和智能分发系统。",
+  "commands": "./commands",
+  "skills": "./skills"
+}
