@@ -21,6 +21,14 @@
       "version": "1.0.0",
       "category": "productivity",
       "homepage": "https://github.com/jisumanbu/build-your-system"
+    },
+    {
+      "name": "claude-notify",
+      "source": "./claude-notify",
+      "description": "智能通知插件 - Claude Code 完成任务或需要权限时发送 macOS 通知，支持点击跳转到对应终端。",
+      "version": "1.0.0",
+      "category": "utilities",
+      "homepage": "https://github.com/jisumanbu/build-your-system"
     }
   ]
 }

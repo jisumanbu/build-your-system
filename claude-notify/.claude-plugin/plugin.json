@@ -2,6 +2,5 @@
   "name": "claude-notify",
   "version": "1.0.0",
   "description": "Claude Code 智能通知 - 任务完成时发送 macOS 通知，支持点击跳转（当前支持 iTerm2，后续支持 Terminal/Cursor）",
-  "commands": "./commands",
-  "hooks": "./hooks"
+  "commands": "./commands"
 }
