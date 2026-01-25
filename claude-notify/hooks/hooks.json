@@ -1,0 +1,28 @@
+{
+  "description": "Claude Code 智能通知 - Stop 和权限请求时发送通知",
+  "hooks": {
+    "Stop": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/notify-smart.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ],
+    "Notification": [
+      {
+        "matcher": "permission_prompt",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash ${CLAUDE_PLUGIN_ROOT}/hooks/scripts/notify-smart.sh",
+            "timeout": 5
+          }
+        ]
+      }
+    ]
+  }
+}
