@@ -1,0 +1,20 @@
+{
+  "name": "build-your-system-assistant",
+  "version": "0.1.0",
+  "description": "Personal assistant workflows for Obsidian Vaults in Codex.",
+  "skills": "./skills",
+  "interface": {
+    "displayName": "Build Your System Assistant",
+    "shortDescription": "Obsidian Vault assistant workflows for Codex",
+    "longDescription": "Capture, review, timeline, weekly summary, export, and related Obsidian Vault workflows adapted from the original Claude assistant plugin.",
+    "developerName": "J. Liu",
+    "category": "Productivity",
+    "capabilities": ["Skills", "Vault workflow", "Task management"],
+    "defaultPrompt": [
+      "帮我把这条内容捕获到 inbox 并打标签",
+      "基于今天的记录做一次每日回顾",
+      "把这次对话导出成 Obsidian 笔记"
+    ],
+    "brandColor": "#2D6A4F"
+  }
+}

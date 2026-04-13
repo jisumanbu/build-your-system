@@ -1,13 +1,25 @@
 # Build Your System
 
-基于 Obsidian Vault 的个人效率系统 - 包含两个可独立安装的 Claude Code Plugin。
+基于 Obsidian Vault 的个人效率系统 - 当前包含两个 Claude Code Plugin，并提供一个独立的 Codex 适配包。
 
-## 两个 Plugin
+## 两个 Claude Code Plugin
 
 | Plugin | 功能 | 命令数 |
 |--------|------|--------|
 | **assistant** | 任务管理、知识管理、每日回顾 | 10 个 |
 | **media** | 短视频创作（Jenny Hoyos 方法论） | 10 个 |
+
+## Codex 适配包
+
+| Package | 功能 | 位置 |
+|--------|------|------|
+| **assistant-codex** | assistant 的 Codex 独立适配版 | `assistant-codex/` |
+
+说明：
+
+- `assistant-codex/` 不替换现有 `assistant/`
+- 目标是让 Codex 使用同一套 Vault 助手工作流
+- 通过独立目录保持与 Claude 插件隔离
 
 ## 安装
 
