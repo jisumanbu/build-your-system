@@ -1,0 +1,16 @@
+{
+  "plugins": [
+    {
+      "name": "build-your-system-assistant",
+      "source": {
+        "source": "local",
+        "path": "./targets/codex/build-your-system-assistant"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity"
+    }
+  ]
+}
