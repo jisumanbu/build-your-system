@@ -1,0 +1,20 @@
+{
+  "name": "coding-anywhere",
+  "version": "0.1.0",
+  "description": "Self-hosted remote-development stack: mosh + tmux + SSH reverse relay (or DDNS direct) so any mobile device can reach your home Mac with persistent sessions.",
+  "skills": "./skills",
+  "interface": {
+    "displayName": "Coding Anywhere",
+    "shortDescription": "Self-hosted iPhone-to-Mac remote dev stack",
+    "longDescription": "AI-guided setup for mosh + tmux + SSH reverse-relay (or DDNS direct). Lets you keep coding from any device, with sessions that survive network switches and app restarts. Covers two architectures: ECS Relay (works behind any NAT) and DDNS + IPv6 direct (lowest latency).",
+    "developerName": "J. Liu",
+    "category": "Productivity",
+    "capabilities": ["Skills", "Remote development", "Mobile productivity", "SSH automation"],
+    "defaultPrompt": [
+      "帮我搭一套从 iPhone 连回家里 Mac 的远程开发环境",
+      "我想能在咖啡馆/高铁随时进入家中 Mac 的 tmux 会话",
+      "ECS Relay 和 DDNS 直连这两个方案我应该选哪个？"
+    ],
+    "brandColor": "#1F6FEB"
+  }
+}

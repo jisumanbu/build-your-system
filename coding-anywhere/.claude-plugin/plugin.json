@@ -1,0 +1,6 @@
+{
+  "name": "coding-anywhere",
+  "version": "1.0.0",
+  "description": "随时随地远程开发栈 - 一键搭建 mosh + tmux + SSH 中继方案，iPhone/iPad/任何笔记本都能从山顶、咖啡馆、高铁连回家中 Mac。1 个 skill + 5 个配置模板，覆盖 ECS Relay 和 DDNS 直连两种架构。",
+  "skills": "./skills"
+}

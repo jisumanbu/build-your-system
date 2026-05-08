@@ -25,9 +25,17 @@
     {
       "name": "claude-notify",
       "source": "./claude-notify",
-      "description": "智能通知插件 - Claude Code 完成任务或需要权限时发送 macOS 通知，支持点击跳转到对应终端。",
+      "description": "智能通知插件 - Claude Code 完成任务或需要权限时发送 macOS 通知，支持点击跳转（iTerm2 和 Cursor）。",
       "version": "1.0.0",
       "category": "utilities",
+      "homepage": "https://github.com/jisumanbu/build-your-system"
+    },
+    {
+      "name": "coding-anywhere",
+      "source": "./coding-anywhere",
+      "description": "随时随地远程开发栈 - mosh + tmux + SSH 中继一键搭建，iPhone/iPad/任意客户端稳定连回家中 Mac。1 个 skill + 5 个配置模板，覆盖 ECS Relay 和 DDNS 直连。",
+      "version": "1.0.0",
+      "category": "productivity",
       "homepage": "https://github.com/jisumanbu/build-your-system"
     }
   ]
