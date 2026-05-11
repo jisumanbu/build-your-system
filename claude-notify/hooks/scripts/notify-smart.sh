@@ -31,10 +31,14 @@ tmux_session_name=""
 tmux_window_id=""
 tmux_pane_id=""
 if [ "$terminal_type" = "iterm+tmux" ]; then
-    tmux_session_id=$(tmux display-message -p '#{session_id}' 2>/dev/null)
-    tmux_session_name=$(tmux display-message -p '#{session_name}' 2>/dev/null)
-    tmux_window_id=$(tmux display-message -p '#{window_id}' 2>/dev/null)
+    # Anchor ALL queries to $TMUX_PANE (the pane Claude actually lives in).
+    # Without -t, `tmux display-message` reports the session's currently-active
+    # window/pane — if the user wandered to another window before this hook fired,
+    # we'd capture the wrong window_id and the file would be internally inconsistent.
     tmux_pane_id="$TMUX_PANE"
+    tmux_session_id=$(tmux display-message -t "$tmux_pane_id" -p '#{session_id}' 2>/dev/null)
+    tmux_session_name=$(tmux display-message -t "$tmux_pane_id" -p '#{session_name}' 2>/dev/null)
+    tmux_window_id=$(tmux display-message -t "$tmux_pane_id" -p '#{window_id}' 2>/dev/null)
     log INFO "notify: tmux session=$tmux_session_id($tmux_session_name) win=$tmux_window_id pane=$tmux_pane_id"
 fi
 
