@@ -105,14 +105,14 @@ EOF
             for i in 1 2 3; do
                 tmux set-window-option -t "$tmux_window_id" pane-active-border-style 'fg=brightwhite,bg=red,bold' 2>/dev/null
                 tmux refresh-client 2>/dev/null
-                sleep 0.2
+                sleep 0.4
                 if [ -n "$orig" ]; then
                     tmux set-window-option -t "$tmux_window_id" pane-active-border-style "$orig" 2>/dev/null
                 else
                     tmux set-window-option -t "$tmux_window_id" -u pane-active-border-style 2>/dev/null
                 fi
                 tmux refresh-client 2>/dev/null
-                sleep 0.2
+                sleep 0.4
             done
         ) & disown
         log INFO "jump: iterm+tmux complete (tty=$client_tty pane=$tmux_pane_id)"
