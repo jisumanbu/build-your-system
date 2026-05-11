@@ -49,7 +49,8 @@ case "$terminal_type" in
             front_tty=$(osascript -e 'tell application "iTerm2" to tell current session of current tab of current window to return tty' 2>/dev/null)
             client_tty=$(tmux list-clients -t "$tmux_session_id" -F '#{client_tty}' 2>/dev/null | head -1)
             active_pane=$(tmux display-message -t "$tmux_session_id" -p '#{pane_id}' 2>/dev/null)
-            if [ "$front_tty" = "$client_tty" ] && [ "$active_pane" = "$tmux_pane_id" ]; then
+            if [ -n "$front_tty" ] && [ -n "$client_tty" ] && [ -n "$active_pane" ] \
+               && [ "$front_tty" = "$client_tty" ] && [ "$active_pane" = "$tmux_pane_id" ]; then
                 should_notify=false
             fi
         fi
