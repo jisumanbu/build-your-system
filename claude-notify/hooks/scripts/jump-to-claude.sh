@@ -1,148 +1,110 @@
 #!/bin/bash
-# 跳转到最近收到通知的 Claude Code Session
-# 支持 iTerm2 和 Cursor (VS Code)
+# Jump to the Claude Code session/pane that emitted the last notification.
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+source "$SCRIPT_DIR/lib/log.sh"
+source "$SCRIPT_DIR/lib/session-info.sh"
 
-# DEBUG: 记录执行
-echo "$(date): jump-to-claude.sh started" >> /tmp/claude-jump-debug.log
+# Initialize all expected vars so read_session_info populating subset is safe.
+terminal_type="" claude_session_id=""
+tmux_session_id="" tmux_session_name=""
+tmux_window_id="" tmux_pane_id=""
+project_name="" claude_cwd=""
 
-SESSION_INFO_FILE="/tmp/claude-last-session-info"
+notify_error() {
+    local title="$1"; local body="$2"
+    log ERROR "jump: $title — $body"
+    osascript -e "display notification \"$body\" with title \"$title\""
+}
 
-# 检查文件是否存在
-if [ ! -f "$SESSION_INFO_FILE" ]; then
-    osascript -e 'display notification "没有最近的 Claude Code 通知" with title "跳转失败"'
-    exit 1
-fi
+# ---- 1. Read session info ----
+read_session_info
+rc=$?
+case "$rc" in
+    0)  ;;
+    2)  notify_error "无最近通知" "没有可跳转的通知"; exit 1 ;;
+    3)  notify_error "通知格式过旧" "请重新触发一次通知"; exit 1 ;;
+    4)  notify_error "脚本版本过旧" "请升级 claude-notify 插件"; exit 1 ;;
+    *)  notify_error "未知错误" "读取会话信息失败 (rc=$rc)"; exit 1 ;;
+esac
 
-# 读取终端信息（格式：terminal_type:session_id:project_name）
-session_info=$(cat "$SESSION_INFO_FILE")
+log INFO "jump: terminal_type=$terminal_type project=$project_name"
 
-# 解析字段
-terminal_type=$(echo "$session_info" | cut -d: -f1)
-target_session_id=$(echo "$session_info" | cut -d: -f2)
-project_name=$(echo "$session_info" | cut -d: -f3-)
-
-if [ -z "$terminal_type" ]; then
-    osascript -e 'display notification "终端信息为空" with title "跳转失败"'
-    exit 1
-fi
-
-# 关闭 Claude Code 通知
+# Dismiss the clicked notification
 terminal-notifier -remove "claude-code" 2>/dev/null
 
-# 根据终端类型执行跳转
 case "$terminal_type" in
-    "iterm")
-        # iTerm2: 精确到 Session 的跳转
-        if [ -z "$target_session_id" ]; then
-            osascript -e 'display notification "Session ID 为空" with title "跳转失败"'
+
+    "iterm+tmux")
+        # ---- A. tmux state checks ----
+        if ! tmux has-session -t "$tmux_session_id" 2>/dev/null; then
+            notify_error "tmux 状态异常" "tmux session $tmux_session_name 已退出"
             exit 1
         fi
-        osascript << EOF
+        if ! tmux list-panes -t "$tmux_pane_id" >/dev/null 2>&1; then
+            notify_error "tmux 状态异常" "tmux pane $tmux_pane_id 已关闭"
+            exit 1
+        fi
+        client_tty=$(tmux list-clients -t "$tmux_session_id" -F '#{client_tty}' 2>/dev/null | head -1)
+        if [ -z "$client_tty" ]; then
+            notify_error "tmux 状态异常" "session '$tmux_session_name' 已 detach，请手动 attach"
+            exit 1
+        fi
+
+        # ---- B. Resolve iTerm session by client_tty, focus it ----
+        result=$(osascript <<EOF 2>&1
 tell application "iTerm2"
     activate
-    set targetSessionId to "$target_session_id"
-
+    set targetTty to "$client_tty"
     repeat with w in windows
         repeat with t in tabs of w
             repeat with s in sessions of t
                 try
-                    tell s
-                        set sessionId to unique ID
-                    end tell
-                    if sessionId = targetSessionId then
+                    if (tty of s) is targetTty then
                         select w
                         tell w to select t
-                        select s
-                        return
+                        tell t to select s
+                        return "OK"
                     end if
                 end try
             end repeat
         end repeat
     end repeat
+    return "NOTFOUND"
 end tell
-EOF
-        ;;
-    "vscode")
-        # Cursor/VS Code: 通过窗口标题精准跳转
-        echo "$(date): vscode branch, project_name=$project_name" >> /tmp/claude-jump-debug.log
-        if [ -z "$project_name" ]; then
-            # 没有项目名，只激活应用
-            echo "$(date): no project_name, activating app" >> /tmp/claude-jump-debug.log
-            osascript -e 'tell application "Cursor" to activate' 2>/dev/null || \
-            osascript -e 'tell application "Visual Studio Code" to activate' 2>/dev/null
-        else
-            echo "$(date): running AppleScript for $project_name" >> /tmp/claude-jump-debug.log
-            # 使用 Cursor/VS Code 原生接口 + System Events 组合方案
-            # 先激活应用确保窗口可访问，再精确匹配
-            result=$(osascript << EOF 2>&1
-set targetProject to "$project_name"
-set appFound to false
-set allWindows to ""
-
--- 尝试 Cursor（优先）
-try
-    tell application "Cursor"
-        activate
-        delay 0.1
-    end tell
-    set appFound to true
-    set appName to "Cursor"
-on error
-    set appFound to false
-end try
-
--- 如果 Cursor 不存在，尝试 VS Code
-if not appFound then
-    try
-        tell application "Visual Studio Code"
-            activate
-            delay 0.1
-        end tell
-        set appFound to true
-        set appName to "Code"
-    on error
-        return "ERROR: No Cursor or VS Code found"
-    end try
-end if
-
--- 使用 System Events 精确匹配窗口
-tell application "System Events"
-    if appName = "Cursor" then
-        tell process "Cursor"
-            repeat with w in windows
-                set winName to name of w
-                set allWindows to allWindows & winName & ", "
-                if winName contains targetProject then
-                    -- 找到目标窗口，激活它
-                    set value of attribute "AXMain" of w to true
-                    perform action "AXRaise" of w
-                    return "SUCCESS: " & winName
-                end if
-            end repeat
-        end tell
-    else
-        tell process "Code"
-            repeat with w in windows
-                set winName to name of w
-                set allWindows to allWindows & winName & ", "
-                if winName contains targetProject then
-                    set value of attribute "AXMain" of w to true
-                    perform action "AXRaise" of w
-                    return "SUCCESS: " & winName
-                end if
-            end repeat
-        end tell
-    end if
-end tell
-
-return "NO MATCH. Windows: " & allWindows
 EOF
 )
-            echo "$(date): AppleScript result: $result" >> /tmp/claude-jump-debug.log
+        if [ "$result" != "OK" ]; then
+            notify_error "iTerm 未找到" "tty $client_tty 不在任何 iTerm session 中"
+            exit 1
         fi
+
+        # ---- C. tmux 3-level switch ----
+        tmux switch-client -t "$tmux_session_id" 2>/dev/null
+        tmux select-window -t "$tmux_window_id" 2>/dev/null
+        tmux select-pane   -t "$tmux_pane_id"   2>/dev/null
+
+        # ---- D. Border flash 3x (background, won't block notification callback) ----
+        orig=$(tmux show-window-options -t "$tmux_window_id" -v pane-active-border-style 2>/dev/null || true)
+        (
+            for i in 1 2 3; do
+                tmux set-window-option -t "$tmux_window_id" pane-active-border-style 'fg=yellow,bold' 2>/dev/null
+                sleep 0.2
+                if [ -n "$orig" ]; then
+                    tmux set-window-option -t "$tmux_window_id" pane-active-border-style "$orig" 2>/dev/null
+                else
+                    tmux set-window-option -t "$tmux_window_id" -u pane-active-border-style 2>/dev/null
+                fi
+                sleep 0.2
+            done
+        ) & disown
+        log INFO "jump: iterm+tmux complete (tty=$client_tty pane=$tmux_pane_id)"
         ;;
+
     *)
-        osascript -e 'display notification "未知的终端类型: '"$terminal_type"'" with title "跳转失败"'
+        # Other branches added in Task 6
+        notify_error "未实现的终端类型" "$terminal_type (Task 6 待实现)"
         exit 1
         ;;
 esac
+
+exit 0
