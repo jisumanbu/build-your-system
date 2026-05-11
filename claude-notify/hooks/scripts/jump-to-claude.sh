@@ -35,6 +35,10 @@ terminal-notifier -remove "claude-code" 2>/dev/null
 case "$terminal_type" in
 
     "iterm+tmux")
+        if [ -z "$tmux_session_id" ] || [ -z "$tmux_window_id" ] || [ -z "$tmux_pane_id" ]; then
+            notify_error "缺失 tmux 信息" "session info 不完整 (session=$tmux_session_id window=$tmux_window_id pane=$tmux_pane_id)"
+            exit 1
+        fi
         # ---- A. tmux state checks ----
         if ! tmux has-session -t "$tmux_session_id" 2>/dev/null; then
             notify_error "tmux 状态异常" "tmux session $tmux_session_name 已退出"
