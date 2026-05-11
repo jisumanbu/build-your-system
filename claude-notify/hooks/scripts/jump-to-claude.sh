@@ -104,9 +104,105 @@ EOF
         log INFO "jump: iterm+tmux complete (tty=$client_tty pane=$tmux_pane_id)"
         ;;
 
+    "iterm")
+        if [ -z "$claude_session_id" ]; then
+            notify_error "iTerm 信息缺失" "Session ID 为空"
+            exit 1
+        fi
+        result=$(osascript <<EOF 2>&1
+tell application "iTerm2"
+    activate
+    set targetId to "$claude_session_id"
+    repeat with w in windows
+        repeat with t in tabs of w
+            repeat with s in sessions of t
+                try
+                    if (unique ID of s) is targetId then
+                        select w
+                        tell w to select t
+                        tell t to select s
+                        return "OK"
+                    end if
+                end try
+            end repeat
+        end repeat
+    end repeat
+    return "NOTFOUND"
+end tell
+EOF
+)
+        if [ "$result" != "OK" ]; then
+            notify_error "iTerm 未找到" "session $claude_session_id 不存在"
+            exit 1
+        fi
+        log INFO "jump: iterm complete (session=$claude_session_id)"
+        ;;
+
+    "cursor")
+        if ! pgrep -x Cursor >/dev/null 2>&1; then
+            notify_error "应用未运行" "Cursor.app 未启动"
+            exit 1
+        fi
+        result=$(osascript <<EOF 2>&1
+tell application "Cursor" to activate
+delay 0.1
+tell application "System Events"
+    tell process "Cursor"
+        repeat with w in windows
+            if name of w contains "$project_name" then
+                set value of attribute "AXMain" of w to true
+                perform action "AXRaise" of w
+                return "OK"
+            end if
+        end repeat
+    end tell
+end tell
+return "NOTFOUND"
+EOF
+)
+        if [ "$result" != "OK" ]; then
+            notify_error "Cursor 窗口未找到" "找不到含 '$project_name' 的窗口"
+            exit 1
+        fi
+        log INFO "jump: cursor complete (project=$project_name)"
+        ;;
+
+    "vscode")
+        if ! pgrep -x "Code" >/dev/null 2>&1 && ! pgrep -x "Code Helper" >/dev/null 2>&1; then
+            notify_error "应用未运行" "Visual Studio Code.app 未启动"
+            exit 1
+        fi
+        result=$(osascript <<EOF 2>&1
+tell application "Visual Studio Code" to activate
+delay 0.1
+tell application "System Events"
+    tell process "Code"
+        repeat with w in windows
+            if name of w contains "$project_name" then
+                set value of attribute "AXMain" of w to true
+                perform action "AXRaise" of w
+                return "OK"
+            end if
+        end repeat
+    end tell
+end tell
+return "NOTFOUND"
+EOF
+)
+        if [ "$result" != "OK" ]; then
+            notify_error "VS Code 窗口未找到" "找不到含 '$project_name' 的窗口"
+            exit 1
+        fi
+        log INFO "jump: vscode complete (project=$project_name)"
+        ;;
+
+    "unknown")
+        notify_error "终端类型未知" "通知发出时无法识别终端"
+        exit 1
+        ;;
+
     *)
-        # Other branches added in Task 6
-        notify_error "未实现的终端类型" "$terminal_type (Task 6 待实现)"
+        notify_error "终端类型异常" "$terminal_type"
         exit 1
         ;;
 esac
