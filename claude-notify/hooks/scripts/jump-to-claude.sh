@@ -90,21 +90,28 @@ EOF
         fi
 
         # ---- C. tmux 3-level switch ----
-        tmux switch-client -t "$tmux_session_id" 2>/dev/null
+        # -c "$client_tty" pins the operation to the iTerm pane we just focused.
+        # Without it, switch-client would act on tmux's "last-active" client,
+        # which may be a different iTerm pane and would mistakenly re-attach it.
+        tmux switch-client -c "$client_tty" -t "$tmux_session_id" 2>/dev/null
         tmux select-window -t "$tmux_window_id" 2>/dev/null
         tmux select-pane   -t "$tmux_pane_id"   2>/dev/null
 
         # ---- D. Border flash 3x (background, won't block notification callback) ----
+        # Pick a high-contrast style: bright white on red background. User palettes
+        # commonly use yellows/oranges, so fg=yellow blends in — bg=red is unmissable.
         orig=$(tmux show-window-options -t "$tmux_window_id" -v pane-active-border-style 2>/dev/null || true)
         (
             for i in 1 2 3; do
-                tmux set-window-option -t "$tmux_window_id" pane-active-border-style 'fg=yellow,bold' 2>/dev/null
+                tmux set-window-option -t "$tmux_window_id" pane-active-border-style 'fg=brightwhite,bg=red,bold' 2>/dev/null
+                tmux refresh-client 2>/dev/null
                 sleep 0.2
                 if [ -n "$orig" ]; then
                     tmux set-window-option -t "$tmux_window_id" pane-active-border-style "$orig" 2>/dev/null
                 else
                     tmux set-window-option -t "$tmux_window_id" -u pane-active-border-style 2>/dev/null
                 fi
+                tmux refresh-client 2>/dev/null
                 sleep 0.2
             done
         ) & disown
