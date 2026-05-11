@@ -115,6 +115,23 @@ argument-hint: "[可选参数]"
 - `!` 强制执行（如 `!`python3 script.py``），Claude 无法跳过
 - `${CLAUDE_PLUGIN_ROOT}` 为 Claude 插件根目录变量
 
+## 编辑后同步到 Cache（重要）
+
+Claude Code 运行时从 `~/.claude/plugins/cache/build-your-system/<plugin>/<version>/` 加载插件，**不是**从这个 marketplace 源目录。直接编辑这里的文件不会立刻生效，必须先同步到 cache。
+
+```bash
+bash scripts/sync-to-cache.sh   # 同步所有已安装插件到对应的 cache 版本
+```
+
+仓库已配置 `.git/hooks/post-commit`（未跟踪），每次 commit 后自动跑这个脚本。正常 commit 流程下不需要手动 sync。新克隆仓库后需要手动安装 hook：
+
+```bash
+ln -sf ../../scripts/sync-to-cache.sh .git/hooks/post-commit
+chmod +x .git/hooks/post-commit
+```
+
+`/reload-plugins` 只刷新 plugin 元数据（commands/skills/agents 索引），**不**做文件同步。
+
 ## 测试方法
 
 ### Claude 本地开发
