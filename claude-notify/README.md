@@ -113,6 +113,36 @@ Cursor: 始终通知
 
 插件会通过窗口标题匹配项目名称，自动跳转到正确的 Cursor 窗口。确保你的 Cursor 窗口标题包含项目名（默认行为）。
 
+## tmux 支持
+
+当你在 tmux 内运行 Claude（iTerm2 → tmux → claude），通知点击会自动：
+
+1. 切回 iTerm2 应用
+2. 定位到 host 该 tmux client 的 iTerm session（通过 `tmux list-clients` 的 client tty 反查）
+3. 在 tmux 内 `switch-client` / `select-window` / `select-pane` 三级跳转
+4. 闪烁目标 pane 边框 3 次（黄色 200ms ↔ 默认 200ms）
+
+**已知限制：**
+
+- tmux session detach 状态下点击通知：显示错误"session 已 detach，请手动 attach"。脚本不自动 reattach。
+- nested tmux 按内层 `$TMUX` 识别。
+- 集成终端（VS Code / Cursor）：跳转停在 window 级，无法定位具体 terminal pane（macOS 自动化能力上限）。
+
+## 故障排查
+
+- 日志：`/tmp/claude-notify.log`（最大 1MB，自动 rotate 保留最后 500 行）
+- 上次通知的会话信息：`cat /tmp/claude-last-session-info`
+- 单元测试：`bash claude-notify/tests/run-all.sh`
+
+**常见错误通知：**
+
+| 标题 | 含义 |
+|------|------|
+| tmux 状态异常 | tmux session/pane 已关闭或 detach |
+| iTerm 未找到 | tmux client tty 不再对应任何 iTerm session |
+| 应用未运行 | Cursor / VS Code 未启动 |
+| 通知格式过旧 | session info 文件 schema 版本不匹配（请触发新通知后再点击） |
+
 ## License
 
 MIT
