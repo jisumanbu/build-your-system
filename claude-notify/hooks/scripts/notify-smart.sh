@@ -3,6 +3,11 @@
 # Detects: iterm+tmux (new), iterm, cursor, vscode, unknown.
 # Suppresses notification when target window is already focused.
 
+# Ensure Homebrew binaries (tmux, terminal-notifier) are findable when this
+# script runs from a context with a sanitized PATH (GUI shortcut handlers,
+# launchd, terminal-notifier callbacks).
+export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 source "$SCRIPT_DIR/lib/log.sh"
 source "$SCRIPT_DIR/lib/detect-terminal.sh"

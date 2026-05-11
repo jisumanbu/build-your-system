@@ -1,5 +1,12 @@
 #!/bin/bash
 # Jump to the Claude Code session/pane that emitted the last notification.
+
+# Ensure Homebrew binaries (tmux, terminal-notifier) are findable when this
+# script runs from a context with a sanitized PATH (GUI shortcut handlers,
+# launchd, terminal-notifier callbacks). Without this, tmux returns 127
+# "command not found" and the script misreports it as "session gone".
+export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"
+
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 source "$SCRIPT_DIR/lib/log.sh"
 source "$SCRIPT_DIR/lib/session-info.sh"
