@@ -30,6 +30,7 @@ tmux_session_id=""
 tmux_session_name=""
 tmux_window_id=""
 tmux_pane_id=""
+tmux_pane_title=""
 if [ "$terminal_type" = "iterm+tmux" ]; then
     # Anchor ALL queries to $TMUX_PANE (the pane Claude actually lives in).
     # Without -t, `tmux display-message` reports the session's currently-active
@@ -39,7 +40,8 @@ if [ "$terminal_type" = "iterm+tmux" ]; then
     tmux_session_id=$(tmux display-message -t "$tmux_pane_id" -p '#{session_id}' 2>/dev/null)
     tmux_session_name=$(tmux display-message -t "$tmux_pane_id" -p '#{session_name}' 2>/dev/null)
     tmux_window_id=$(tmux display-message -t "$tmux_pane_id" -p '#{window_id}' 2>/dev/null)
-    log INFO "notify: tmux session=$tmux_session_id($tmux_session_name) win=$tmux_window_id pane=$tmux_pane_id"
+    tmux_pane_title=$(tmux display-message -t "$tmux_pane_id" -p '#{pane_title}' 2>/dev/null)
+    log INFO "notify: tmux session=$tmux_session_id($tmux_session_name) win=$tmux_window_id pane=$tmux_pane_id title=$tmux_pane_title"
 fi
 
 # ---- 4. Focus detection ----
@@ -88,6 +90,7 @@ write_session_info \
     tmux_session_name="$tmux_session_name" \
     tmux_window_id="$tmux_window_id" \
     tmux_pane_id="$tmux_pane_id" \
+    tmux_pane_title="$tmux_pane_title" \
     project_name="$project_name" \
     claude_cwd="$claude_cwd"
 
@@ -98,14 +101,21 @@ case "$hook_event" in
     *)              msg="需要你的注意"; sound="Glass" ;;
 esac
 
+# Expose tmux pane_title in the notification subtitle so the user can tell
+# which Claude session triggered the notification when running multiple panes.
+subtitle="$project_name"
+if [ "$terminal_type" = "iterm+tmux" ] && [ -n "$tmux_pane_title" ]; then
+    subtitle="$project_name · $tmux_pane_title"
+fi
+
 jump_script="$SCRIPT_DIR/jump-to-claude.sh"
 terminal-notifier \
     -title "Claude Code" \
-    -subtitle "$project_name" \
+    -subtitle "$subtitle" \
     -message "$msg" \
     -sound "$sound" \
     -group "claude-code" \
     -execute "$jump_script"
 
-log INFO "notify: emitted ($terminal_type) project=$project_name"
+log INFO "notify: emitted ($terminal_type) subtitle=$subtitle"
 exit 0
