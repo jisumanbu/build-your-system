@@ -1,49 +1,46 @@
-# Claude Code 智能通知插件
+# claude-notify
 
-Claude Code 智能通知系统：任务完成时发送 macOS 通知，支持点击跳转。
+Claude Code 在长任务结束、需要权限或问问题时，给你一条 macOS 通知；点一下，焦点回到那个 Claude 所在的终端、标签、tmux pane。
 
-> 支持 iTerm2 和 Cursor (Claude Code for VS Code)
+> 主要支持 iTerm2（含 tmux）、Cursor、Visual Studio Code。
 
-## 功能
+## 它做什么
 
-- **智能焦点检测**：iTerm2 中只有当你不在 Claude Code 的终端时才通知
-- **点击跳转**：点击通知自动跳转到对应的终端
-- **快捷键跳转**：`Cmd+Shift+J` 跳转到最近收到通知的 Session
-- **通知自动关闭**：跳转后通知自动消失
-- **多终端支持**：自动检测 iTerm2 或 Cursor 环境
+你打开 Claude Code 跑一个比较重的任务，比如让它重构一个文件、过一轮测试、读完一份长文档。任务跑起来你切到浏览器看资料、写笔记，过几秒、几十秒、几分钟，任务完成了——但 Claude 不会自己叫你。
 
-## 前置条件
+这个插件就是来叫你的。Claude Code 触发 Stop hook 的瞬间，`notify-smart.sh` 读 stdin 的 JSON，识别当前是 iTerm2 / iTerm2+tmux / Cursor / VS Code 哪种环境，问一遍"你现在已经盯着那个 Claude 了吗"——是的话什么都不做（你不需要被打扰），不是的话用 `terminal-notifier` 发一条 macOS 通知，同时把当前会话的完整坐标（应用、tab、tmux session/window/pane、pane title）写到 `/tmp/claude-last-session-info`。
 
-- macOS
-- iTerm2 或 Cursor (Claude Code for VS Code)
-- Claude Code CLI
-- Homebrew
+当你点击那条通知，或者按下 Cmd+Shift+J 快捷键，`jump-to-claude.sh` 读出那份坐标文件、做一轮实时校验（tmux server 还在吗？pane 还在吗？iTerm 那个 session 还能找到吗？），然后一层层把焦点拉回到原来的位置：macOS focus → iTerm 应用 → 对应的 iTerm session（通过 tmux client tty 反查）→ 对应的 tmux session/window/pane。最后在目标 pane 边框上闪 3 次红底白字，告诉你"就在这里"。
+
+整个过程默认两秒左右。
 
 ## 安装
 
-### 1. 安装 terminal-notifier
-
-```bash
-brew install terminal-notifier
-```
-
-### 2. 启用插件
-
-插件已包含在 build-your-system 中，安装后自动启用。
-
-### 3. 运行设置向导
+### 一键安装（推荐）
 
 ```
 /claude-notify:setup
 ```
 
-### 4. 配置快捷键（可选）
+这个命令会扫描你的环境（terminal-notifier、tmux、iTerm2、Karabiner、AppleScript 权限），报告哪些装了哪些没装，问你要不要装缺的，最后触发一次测试通知验证整套链路。
 
-如果使用 Karabiner-Elements，在 `~/.config/karabiner/karabiner.json` 的 `rules` 数组中添加：
+iTerm2 和 Python 3 由你自己装（前者去 [iterm2.com](https://iterm2.com/downloads.html) 或 `brew install --cask iterm2`，后者是 macOS 自带）；其他依赖 setup 会用 `brew install` 帮你装好。
+
+### 手动安装（如果 setup 出了问题）
+
+最小可用配置只需要一条命令：
+
+```bash
+brew install terminal-notifier
+```
+
+然后给 terminal-notifier 通知权限、给你的 IDE 自动化权限（系统设置 → 隐私与安全性 → 自动化）就能跑了。tmux、Karabiner 可选。
+
+绑定 Cmd+Shift+J 全局快捷键（可选，需要 Karabiner-Elements）：在 `~/.config/karabiner/karabiner.json` 的 `complex_modifications.rules` 里加：
 
 ```json
 {
-  "description": "Cmd+Shift+J: 跳转到 Claude Code",
+  "description": "Cmd+Shift+J: 跳转到最近的 Claude Code",
   "manipulators": [{
     "type": "basic",
     "from": {
@@ -57,91 +54,110 @@ brew install terminal-notifier
 }
 ```
 
-## 工作原理
+## 支持的终端
+
+| 终端                | 焦点检测                                    | 跳转粒度                              |
+|---------------------|---------------------------------------------|---------------------------------------|
+| iTerm2 + tmux       | 比较 iTerm 当前 session 的 tty、tmux client tty、tmux 活跃 pane 三者，全对上才算"已聚焦" | 精确到 tmux pane，含边框闪烁视觉反馈    |
+| iTerm2（无 tmux）   | 比较 iTerm 当前 session 的 unique ID         | 精确到 iTerm session                  |
+| Cursor              | 当前 frontmost app + 前窗口标题含项目名      | window 级（含项目名的窗口）            |
+| Visual Studio Code  | 同上                                        | window 级                             |
+| 其他                | 不支持                                      | 报错 "终端类型未知"                   |
+
+`iTerm2 + tmux` 是这个插件的主力路径——其他终端走的是 macOS AppleScript 能企及的最远的地方，但都做不到 pane 级精度（macOS 自动化能力上限）。
+
+## 行为细节
+
+### 焦点检测
+
+每种 terminal_type 各自的"我现在被你盯着吗"的判断逻辑：
+
+- **iTerm2 + tmux**：iTerm 在前台、当前 iTerm session 的 tty 等于 tmux client tty、tmux session 的活跃 pane 等于 Claude 所在 pane —— 三个条件全部成立才静默。任一不满足就发通知。
+- **iTerm2**：iTerm 在前台、当前 iTerm session 的 unique ID 等于 Claude 启动时记录的那个。
+- **Cursor / VS Code**：对应 app 在前台，且前窗口标题里含项目名（`basename $CWD`）。
+
+通过焦点检测的"已聚焦"会被静默——不会有打扰，只在日志里留一行 `already focused, suppressing`。
+
+### tmux 跳转的四个阶段
+
+点通知（或按快捷键）之后，`iterm+tmux` 路径走这四步：
+
+A 阶段，**实时校验 tmux 状态**：`has-session` 看 server 还在不在、`list-panes` 看 pane 还活不活、`list-clients` 看 session 是不是 attached。三个里任一不满足，弹一个具体的错误通知（"session 已退出" / "pane 已关闭" / "session 已 detach"），然后退出——不试图救活。
+
+B 阶段，**找到正确的 iTerm session**：从 tmux 拿到 `client_tty`（比如 `/dev/ttys006`），让 AppleScript 遍历 iTerm 的所有 window/tab/session，匹配 `tty of s == client_tty` 的那个，select 它、activate iTerm。**这里实时反查的好处**：即使你关掉了原 iTerm 窗口，从新窗口 `tmux a` 重新接上，client_tty 会指向新窗口的 tty，跳转还是能落到正确的地方。
+
+C 阶段，**tmux 三级切换**：`switch-client -c "$client_tty" -t "$session_id"`（`-c` 必须给——不然 tmux 会拿"上次活跃 client"来动手，可能误伤另一个 iTerm pane），然后 `select-window -t "$window_id"`、`select-pane -t "$pane_id"`。
+
+D 阶段，**视觉反馈**：在后台用 `set-window-option pane-active-border-style` 把目标 pane 的边框设成红底白字（`fg=brightwhite,bg=red,bold`）持续 400ms，然后恢复原值持续 400ms，循环 3 次，共 2.4 秒。整个 loop 用 `( ... ) & disown` 跑后台，主脚本立即返回，不阻塞 macOS 通知系统的回调。
+
+### 多 pane 识别
+
+如果你同时在好几个 tmux pane 跑 Claude，通知 subtitle 里会带上 tmux 的 `pane_title`，让你一眼看清楚是哪一个：
 
 ```
-Claude Code 完成任务
-      ↓
-触发 Stop/Notification Hook
-      ↓
-检测终端类型 (iTerm2 / Cursor)
-      ↓
-iTerm2: 检测焦点 → 相同 Session 则不通知
-Cursor: 始终通知
-      ↓
-发送 macOS 通知
-      ↓
-点击 → 跳转到对应终端
+┌─────────────────────────┐
+│ Claude Code             │
+│ vault · CC-Notify       │  ← 项目名 · pane title
+│ 任务完成                 │
+└─────────────────────────┘
 ```
 
-## 触发时机
+`pane_title` 是 tmux 自己的字段（你可以通过 `tmux select-pane -T "标题"` 或 shell 的 escape sequence 设置），插件只是读它、显示它。
 
-| Hook 事件 | 触发时机 | 通知消息 |
-|-----------|----------|----------|
-| Stop | Claude 响应完成 | "任务完成" |
-| Notification (permission_prompt) | Claude 请求权限 | "需要你的确认" |
+### 视觉反馈
 
-## 终端支持状态
+边框颜色选择红底白字（不是更常见的黄色或绿色）是有意的——很多 tmux 主题的 `pane-active-border-style` 默认就用各种暖色调（黄、橙、青），如果闪烁色跟主题色撞车，视觉上等于没闪。红底白字几乎不可能跟任何常态色重合，对比度最高。
 
-| 终端 | 焦点检测 | 点击跳转 | 状态 |
-|------|---------|---------|------|
-| iTerm2 | 精确到 Panel | 精确到 Panel | 已支持 |
-| Cursor | 始终通知 | 精确到窗口 | 已支持 |
-| VS Code | 始终通知 | 精确到窗口 | 已支持 |
-| Terminal.app | - | - | 计划中 |
-
-## 常见问题
-
-### 通知没有声音？
-
-系统设置 → 通知 → terminal-notifier → 打开声音
-
-### 点击通知没反应？
-
-系统设置 → 隐私与安全性 → 自动化 → 允许 terminal-notifier 控制 iTerm2/Cursor
-
-### 快捷键不工作？
-
-1. 确认 Karabiner-Elements 正在运行
-2. 检查 Complex Modifications 中规则是否已启用
-
-### Cursor 中通知太频繁？
-
-这是设计如此。由于 Cursor 不提供 Session ID 环境变量，无法实现精确的焦点检测。如果你主要在 Cursor 中使用 Claude Code，可以考虑调整系统通知设置。
-
-### 多个 Cursor 窗口如何跳转？
-
-插件会通过窗口标题匹配项目名称，自动跳转到正确的 Cursor 窗口。确保你的 Cursor 窗口标题包含项目名（默认行为）。
-
-## tmux 支持
-
-当你在 tmux 内运行 Claude（iTerm2 → tmux → claude），通知点击会自动：
-
-1. 切回 iTerm2 应用
-2. 定位到 host 该 tmux client 的 iTerm session（通过 `tmux list-clients` 的 client tty 反查）
-3. 在 tmux 内 `switch-client` / `select-window` / `select-pane` 三级跳转
-4. 闪烁目标 pane 边框 3 次（黄色 200ms ↔ 默认 200ms）
-
-**已知限制：**
-
-- tmux session detach 状态下点击通知：显示错误"session 已 detach，请手动 attach"。脚本不自动 reattach。
-- nested tmux 按内层 `$TMUX` 识别。
-- 集成终端（VS Code / Cursor）：跳转停在 window 级，无法定位具体 terminal pane（macOS 自动化能力上限）。
+每个 toggle 后会发 `refresh-client` 强制 tmux 立即重绘——某些环境下 tmux 会合并连续的 option 改动到一帧，导致视觉上看不见过渡，refresh 解决这个问题。
 
 ## 故障排查
 
-- 日志：`/tmp/claude-notify.log`（最大 1MB，自动 rotate 保留最后 500 行）
-- 上次通知的会话信息：`cat /tmp/claude-last-session-info`
-- 单元测试：`bash claude-notify/tests/run-all.sh`
+主要看这两个文件：
 
-**常见错误通知：**
+- `/tmp/claude-notify.log`：notify 和 jump 两个脚本共用的日志，1MB 自动 rotate 保留最后 500 行
+- `/tmp/claude-last-session-info`：上次发通知时写下的会话坐标（KV 格式，第一行 `schema_version=2`）
 
-| 标题 | 含义 |
-|------|------|
-| tmux 状态异常 | tmux session/pane 已关闭或 detach |
-| iTerm 未找到 | tmux client tty 不再对应任何 iTerm session |
-| 应用未运行 | Cursor / VS Code 未启动 |
-| 通知格式过旧 | session info 文件 schema 版本不匹配（请触发新通知后再点击） |
+跑单元测试：
+
+```bash
+bash ~/.claude/plugins/marketplaces/build-your-system/claude-notify/tests/run-all.sh
+```
+
+### 常见错误通知
+
+| 通知标题         | 含义                                                              |
+|------------------|-------------------------------------------------------------------|
+| tmux 状态异常    | tmux server 退出 / session 不存在 / pane 关闭 / session 已 detach |
+| 缺失 tmux 信息   | session-info 文件里 tmux 必要字段为空（一般是 notify 时 tmux 命令失败） |
+| iTerm 未找到     | tmux client tty 不再对应任何 iTerm session                        |
+| Cursor 窗口未找到 | Cursor 在跑，但没有标题含项目名的窗口                              |
+| VS Code 窗口未找到 | 同上                                                              |
+| 应用未运行       | Cursor 或 Visual Studio Code 没启动                                |
+| 通知格式过旧     | session-info 文件缺 `schema_version`（插件升级前的残留通知）       |
+| 脚本版本过旧     | session-info 文件的 `schema_version` 大于本脚本支持的版本           |
+| 无最近通知       | session-info 文件不存在                                            |
+| 终端类型未知     | notify 时无法识别终端环境                                          |
+
+每条错误都对应 `jump-to-claude.sh` 里一个具体的检查点，你能通过日志 grep `[ERROR]` 找到根因。
+
+## 设计哲学
+
+**两阶段 + 一份 handoff 文件**。通知和跳转是两个时间点上的事——通知发出时存一份"过去的快照"，跳转执行时读快照 + 实时校验。这两个脚本通过 `/tmp/claude-last-session-info` 解耦，可以独立演进。
+
+**时态分离**。notify-smart 写下的所有 tmux 信息都通过 `-t "$TMUX_PANE"` 锚定到 Claude 所在 pane 的时态（不是"会话现在的活跃位置"），保证 `window_id` 和 `pane_id` 永远内部一致——即使用户在 hook 触发前切走了。jump-to-claude 不信任过去保存的 iTerm session ID，每次都用 tmux client tty 重新反查，所以 reattach 之类的场景能正确跟随。
+
+**Schema 版本**。session-info 文件第一行是 `schema_version=2`。如果脚本读到没有这行的旧格式文件（升级残留），不会崩溃，而是显示"通知格式过旧"提示你重新触发；读到比当前支持的版本更新的，显示"脚本版本过旧"提示你升级插件。这两个错误信息是 graceful migration 的护栏。
+
+**优雅降级**。每一类失败都有一条具体的错误通知，绝不藏在"未知错误"里。tmux server 没了、session detach 了、iTerm 找不到了、应用没运行——每一种你都能从弹出的通知文字直接看出原因，不需要去翻日志。
+
+**PATH 韧性**。两个脚本顶部都 `export PATH="/opt/homebrew/bin:/usr/local/bin:$PATH"`——GUI 触发的 shell 进程（快捷键 handler、`terminal-notifier -execute` 回调）默认 PATH 是 `/usr/bin:/bin`，Homebrew 的 tmux 找不到会让脚本误判为"业务错误"。这是 macOS 自动化的隐藏陷阱。
+
+## 已知限制
+
+- 集成终端（VS Code / Cursor）的跳转停在 window 级——它们没有 iTerm 那样可枚举的 session 树，无法定位具体的 terminal pane。这是 macOS AppleScript 能力的硬上限。
+- nested tmux（tmux 里跑 tmux）按内层的 `$TMUX` 识别。这是罕见场景，不专门处理。
+- tmux session 已 detach 时，跳转脚本只报错不自动 reattach——避免脚本副作用，让用户自己决定怎么恢复。
+- Cmd+Shift+J 全局快捷键依赖 Karabiner-Elements（或其他第三方），macOS 系统快捷键设置没法直接绑定到任意脚本路径。
 
 ## License
 
