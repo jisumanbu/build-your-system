@@ -8,9 +8,11 @@ Claude Code 在长任务结束、需要权限或问问题时，给你一条 macO
 
 你打开 Claude Code 跑一个比较重的任务，比如让它重构一个文件、过一轮测试、读完一份长文档。任务跑起来你切到浏览器看资料、写笔记，过几秒、几十秒、几分钟，任务完成了——但 Claude 不会自己叫你。
 
-这个插件就是来叫你的。Claude Code 触发 Stop hook 的瞬间，`notify-smart.sh` 读 stdin 的 JSON，识别当前是 iTerm2 / iTerm2+tmux / Cursor / VS Code 哪种环境，问一遍"你现在已经盯着那个 Claude 了吗"——是的话什么都不做（你不需要被打扰），不是的话用 `terminal-notifier` 发一条 macOS 通知，同时把当前会话的完整坐标（应用、tab、tmux session/window/pane、pane title）写到 `/tmp/claude-last-session-info`。
+这个插件就是来叫你的。Claude Code 触发 Stop hook 的瞬间，`notify-smart.sh` 读 stdin 的 JSON，识别当前是哪种环境——iTerm2 + tmux、Cursor + tmux、VS Code + tmux、纯 iTerm2、纯 Cursor、纯 VS Code——问一遍"你现在已经盯着那个 Claude 了吗"。是的话什么都不做（你不需要被打扰），不是的话用 `terminal-notifier` 发一条 macOS 通知，同时把当前会话的完整坐标（应用、tab、tmux session/window/pane、pane title）写到 `/tmp/claude-last-session-info`。
 
-当你点击那条通知，或者按下 Cmd+Shift+J 快捷键，`jump-to-claude.sh` 读出那份坐标文件、做一轮实时校验（tmux server 还在吗？pane 还在吗？iTerm 那个 session 还能找到吗？），然后一层层把焦点拉回到原来的位置：macOS focus → iTerm 应用 → 对应的 iTerm session（通过 tmux client tty 反查）→ 对应的 tmux session/window/pane。最后在目标 pane 边框上闪 3 次红底白字，告诉你"就在这里"。
+在 tmux 里时，插件自动识别 tmux 的宿主应用：它从 tmux client 的 tty 用 `lsof + ps` 一路追到 GUI app，分清你这个 tmux 是跑在 iTerm 还是 Cursor 还是 VS Code 的集成终端里——选对应的跳转策略。
+
+当你点击那条通知，或者按下 Cmd+Shift+J 快捷键，`jump-to-claude.sh` 读出那份坐标文件、做一轮实时校验（tmux server 还在吗？pane 还在吗？iTerm 那个 session 还能找到吗？），然后一层层把焦点拉回到原来的位置。iTerm + tmux 主路径：macOS focus → iTerm 应用 → 对应的 iTerm session（通过 tmux client tty 反查）→ 对应的 tmux session/window/pane，再在目标 pane 边框上闪 3 次红底白字。其他路径（IDE + tmux、纯 IDE）退化到 window 级，因为 macOS AppleScript 不暴露 IDE 集成终端的几何信息。
 
 整个过程默认两秒左右。
 
@@ -56,15 +58,19 @@ brew install terminal-notifier
 
 ## 支持的终端
 
-| 终端                | 焦点检测                                    | 跳转粒度                              |
-|---------------------|---------------------------------------------|---------------------------------------|
-| iTerm2 + tmux       | 比较 iTerm 当前 session 的 tty、tmux client tty、tmux 活跃 pane 三者，全对上才算"已聚焦" | 精确到 tmux pane，含边框闪烁视觉反馈    |
-| iTerm2（无 tmux）   | 比较 iTerm 当前 session 的 unique ID         | 精确到 iTerm session                  |
-| Cursor              | 当前 frontmost app + 前窗口标题含项目名      | window 级（含项目名的窗口）            |
-| Visual Studio Code  | 同上                                        | window 级                             |
-| 其他                | 不支持                                      | 报错 "终端类型未知"                   |
+| 终端                      | 焦点检测                                    | 跳转粒度                                        |
+|---------------------------|---------------------------------------------|-------------------------------------------------|
+| iTerm2 + tmux             | iTerm 前台 + 当前 session 的 tty == tmux client tty + tmux 活跃 pane == Claude pane | 精确到 tmux pane，含边框闪烁视觉反馈              |
+| Cursor + tmux             | Cursor 前台 + 当前窗口标题含项目名（无法看到具体集成终端 tab）| Cursor window 级 + tmux 内 select-pane（无闪烁） |
+| Visual Studio Code + tmux | VS Code 前台 + 当前窗口标题含项目名          | VS Code window 级 + tmux 内 select-pane（无闪烁）|
+| iTerm2（无 tmux）         | 比较 iTerm 当前 session 的 unique ID         | 精确到 iTerm session                            |
+| Cursor                    | 当前 frontmost app + 前窗口标题含项目名      | window 级（含项目名的窗口）                      |
+| Visual Studio Code        | 同上                                        | window 级                                       |
+| 其他                      | 不支持                                      | 报错 "终端类型未知"                              |
 
-`iTerm2 + tmux` 是这个插件的主力路径——其他终端走的是 macOS AppleScript 能企及的最远的地方，但都做不到 pane 级精度（macOS 自动化能力上限）。
+`iTerm2 + tmux` 是这个插件的主力路径——精确到 pane 级 + 边框闪烁视觉反馈。其他 +tmux 路径只能到 IDE window 级（IDE 不像 iTerm 那样把集成终端的 PTY 树暴露给 AppleScript），但 tmux 层的 select-pane 仍会执行，所以用户打开 IDE 集成终端时看到的就是正确的 pane。
+
+插件自动识别 tmux 的 host：notify 阶段通过 `lsof + ps` 追 tmux client 的进程链找到 host app（iTerm / Cursor / VS Code），然后选对应的跳转路径。
 
 ## 行为细节
 
@@ -72,9 +78,10 @@ brew install terminal-notifier
 
 每种 terminal_type 各自的"我现在被你盯着吗"的判断逻辑：
 
-- **iTerm2 + tmux**：iTerm 在前台、当前 iTerm session 的 tty 等于 tmux client tty、tmux session 的活跃 pane 等于 Claude 所在 pane —— 三个条件全部成立才静默。任一不满足就发通知。
-- **iTerm2**：iTerm 在前台、当前 iTerm session 的 unique ID 等于 Claude 启动时记录的那个。
-- **Cursor / VS Code**：对应 app 在前台，且前窗口标题里含项目名（`basename $CWD`）。
+- **iTerm2 + tmux**：iTerm 在前台、当前 iTerm session 的 tty 等于 tmux client tty、tmux session 的活跃 pane 等于 Claude 所在 pane —— 三个条件全部成立才静默。
+- **Cursor + tmux / VS Code + tmux**：对应 IDE 在前台 + 当前窗口标题含项目名。退化版——IDE 不暴露集成终端的 PTY，所以无法验证你是不是真盯着那个 Claude 所在的 tab。
+- **iTerm2（无 tmux）**：iTerm 在前台、当前 iTerm session 的 unique ID 等于 Claude 启动时记录的那个。
+- **Cursor / VS Code（无 tmux）**：对应 app 在前台，且前窗口标题里含项目名（`basename $CWD`）。
 
 通过焦点检测的"已聚焦"会被静默——不会有打扰，只在日志里留一行 `already focused, suppressing`。
 
@@ -154,10 +161,12 @@ bash ~/.claude/plugins/marketplaces/build-your-system/claude-notify/tests/run-al
 
 ## 已知限制
 
-- 集成终端（VS Code / Cursor）的跳转停在 window 级——它们没有 iTerm 那样可枚举的 session 树，无法定位具体的 terminal pane。这是 macOS AppleScript 能力的硬上限。
+- IDE 集成终端（VS Code / Cursor）即使在 tmux 里也只能跳到 IDE window 级——它们没有 iTerm 那样可枚举的 session 树，AppleScript 无法定位具体的 terminal tab/pane。tmux 层的 `select-pane` 仍会执行，所以用户切到 IDE 集成终端就看到正确的 pane，但插件没法替用户把焦点先打到那个 tab。
+- 边框闪烁仅在 `iterm+tmux` 路径下生效——其他路径无法精确控制 pane 的视觉属性。
 - nested tmux（tmux 里跑 tmux）按内层的 `$TMUX` 识别。这是罕见场景，不专门处理。
 - tmux session 已 detach 时，跳转脚本只报错不自动 reattach——避免脚本副作用，让用户自己决定怎么恢复。
 - Cmd+Shift+J 全局快捷键依赖 Karabiner-Elements（或其他第三方），macOS 系统快捷键设置没法直接绑定到任意脚本路径。
+- tmux host 自动识别依赖 `lsof + ps` 走进程链。极少数情况（自定义 shell、复杂 nested 容器）下可能识别不出 host，会 fallback 到 `iterm+tmux`——这时 Cursor/VS Code 用户会看到"iTerm 未找到"错误，需要手动确认 host 环境。
 
 ## License
 
