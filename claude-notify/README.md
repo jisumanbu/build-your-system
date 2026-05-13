@@ -24,7 +24,14 @@ Claude Code 在长任务结束、需要权限或问问题时，给你一条 macO
 /claude-notify:setup
 ```
 
-这个命令会扫描你的环境（terminal-notifier、tmux、iTerm2、Karabiner、AppleScript 权限），报告哪些装了哪些没装，问你要不要装缺的，最后触发一次测试通知验证整套链路。
+这个命令会按以下步骤走：
+
+1. **先问你"主要怎么用 Claude Code"**——iTerm2 / Cursor 内置终端 / Cursor 扩展 / 还不确定。按你的选择剪裁后续步骤（Cursor 用户不会被问要不要装 iTerm2 这种无关事）。
+2. **扫描环境**（terminal-notifier、tmux、iTerm2、Karabiner、AppleScript 权限），报告哪些装了哪些没装。
+3. **问你要不要装缺的**——只列出可自动 `brew install` 的项；iTerm2 / Python 3 这种要你自己装，setup 只会提示。
+4. **配置系统权限**（通知权限、自动化权限），自动打开对应的系统设置面板。
+5. **触发一次测试通知**验证整套链路，并明确告诉你"已发出/失败"。
+6. （可选）**绑定 Cmd+Shift+J** 全局快捷键（需要 Karabiner-Elements）。
 
 iTerm2 和 Python 3 由你自己装（前者去 [iterm2.com](https://iterm2.com/downloads.html) 或 `brew install --cask iterm2`，后者是 macOS 自带）；其他依赖 setup 会用 `brew install` 帮你装好。
 
