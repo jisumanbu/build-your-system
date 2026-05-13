@@ -1,6 +1,6 @@
 #!/bin/bash
 # Multi-terminal smart notifier for Claude Code hooks.
-# Detects: iterm+tmux (new), iterm, cursor, vscode, unknown.
+# Detects: iterm+tmux, cursor+tmux, vscode+tmux, iterm, cursor, vscode, unknown.
 # Suppresses notification when target window is already focused.
 
 # Ensure Homebrew binaries (tmux, terminal-notifier) are findable when this
@@ -31,18 +31,20 @@ tmux_session_name=""
 tmux_window_id=""
 tmux_pane_id=""
 tmux_pane_title=""
-if [ "$terminal_type" = "iterm+tmux" ]; then
-    # Anchor ALL queries to $TMUX_PANE (the pane Claude actually lives in).
-    # Without -t, `tmux display-message` reports the session's currently-active
-    # window/pane — if the user wandered to another window before this hook fired,
-    # we'd capture the wrong window_id and the file would be internally inconsistent.
-    tmux_pane_id="$TMUX_PANE"
-    tmux_session_id=$(tmux display-message -t "$tmux_pane_id" -p '#{session_id}' 2>/dev/null)
-    tmux_session_name=$(tmux display-message -t "$tmux_pane_id" -p '#{session_name}' 2>/dev/null)
-    tmux_window_id=$(tmux display-message -t "$tmux_pane_id" -p '#{window_id}' 2>/dev/null)
-    tmux_pane_title=$(tmux display-message -t "$tmux_pane_id" -p '#{pane_title}' 2>/dev/null)
-    log INFO "notify: tmux session=$tmux_session_id($tmux_session_name) win=$tmux_window_id pane=$tmux_pane_id title=$tmux_pane_title"
-fi
+case "$terminal_type" in
+    iterm+tmux|cursor+tmux|vscode+tmux)
+        # Anchor ALL queries to $TMUX_PANE (the pane Claude actually lives in).
+        # Without -t, `tmux display-message` reports the session's currently-active
+        # window/pane — if the user wandered to another window before this hook fired,
+        # we'd capture the wrong window_id and the file would be internally inconsistent.
+        tmux_pane_id="$TMUX_PANE"
+        tmux_session_id=$(tmux display-message -t "$tmux_pane_id" -p '#{session_id}' 2>/dev/null)
+        tmux_session_name=$(tmux display-message -t "$tmux_pane_id" -p '#{session_name}' 2>/dev/null)
+        tmux_window_id=$(tmux display-message -t "$tmux_pane_id" -p '#{window_id}' 2>/dev/null)
+        tmux_pane_title=$(tmux display-message -t "$tmux_pane_id" -p '#{pane_title}' 2>/dev/null)
+        log INFO "notify: tmux session=$tmux_session_id($tmux_session_name) win=$tmux_window_id pane=$tmux_pane_id title=$tmux_pane_title"
+        ;;
+esac
 
 # ---- 4. Focus detection ----
 should_notify=true
@@ -66,9 +68,14 @@ case "$terminal_type" in
             fi
         fi
         ;;
-    "cursor"|"vscode")
-        target_app="Cursor"
-        [ "$terminal_type" = "vscode" ] && target_app="Code"
+    "cursor"|"vscode"|"cursor+tmux"|"vscode+tmux")
+        # IDE 不暴露 PTY 给 AppleScript，所以无论是否在 tmux 里，
+        # focus 检测都退化为"目标 IDE 前台 + 当前窗口标题含项目名"。
+        # tmux 内还多一层不可见 pane，但这是 macOS 自动化能力的硬上限。
+        case "$terminal_type" in
+            cursor|cursor+tmux) target_app="Cursor" ;;
+            vscode|vscode+tmux) target_app="Code" ;;
+        esac
         active_app=$(osascript -e 'tell application "System Events" to get name of first process whose frontmost is true' 2>/dev/null)
         if [ "$active_app" = "$target_app" ]; then
             title=$(osascript -e "tell application \"System Events\" to tell process \"$target_app\" to get name of front window" 2>/dev/null)
@@ -104,9 +111,11 @@ esac
 # Expose tmux pane_title in the notification subtitle so the user can tell
 # which Claude session triggered the notification when running multiple panes.
 subtitle="$project_name"
-if [ "$terminal_type" = "iterm+tmux" ] && [ -n "$tmux_pane_title" ]; then
-    subtitle="$project_name · $tmux_pane_title"
-fi
+case "$terminal_type" in
+    iterm+tmux|cursor+tmux|vscode+tmux)
+        [ -n "$tmux_pane_title" ] && subtitle="$project_name · $tmux_pane_title"
+        ;;
+esac
 
 jump_script="$SCRIPT_DIR/jump-to-claude.sh"
 terminal-notifier \

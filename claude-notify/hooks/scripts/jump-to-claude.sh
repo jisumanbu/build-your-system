@@ -118,6 +118,75 @@ EOF
         log INFO "jump: iterm+tmux complete (tty=$client_tty pane=$tmux_pane_id)"
         ;;
 
+    "cursor+tmux"|"vscode+tmux")
+        # tmux 跑在 IDE 集成终端里。IDE 不暴露 PTY 给 AppleScript，所以
+        # 我们 (a) 验证 tmux 状态、(b) activate IDE 并 raise 项目 window、
+        # (c) 在 tmux 层做 switch-client + select-window + select-pane，
+        # 让用户打开 IDE 的集成终端就看到正确的 pane。
+        # 不闪烁——同上一条限制：IDE 不暴露 pane 几何。
+        if [ -z "$tmux_session_id" ] || [ -z "$tmux_window_id" ] || [ -z "$tmux_pane_id" ]; then
+            notify_error "缺失 tmux 信息" "session info 不完整 (session=$tmux_session_id window=$tmux_window_id pane=$tmux_pane_id)"
+            exit 1
+        fi
+        if ! tmux has-session -t "$tmux_session_id" 2>/dev/null; then
+            notify_error "tmux 状态异常" "tmux session $tmux_session_name 已退出"
+            exit 1
+        fi
+        if ! tmux list-panes -t "$tmux_pane_id" >/dev/null 2>&1; then
+            notify_error "tmux 状态异常" "tmux pane $tmux_pane_id 已关闭"
+            exit 1
+        fi
+        client_tty=$(tmux list-clients -t "$tmux_session_id" -F '#{client_tty}' 2>/dev/null | head -1)
+        if [ -z "$client_tty" ]; then
+            notify_error "tmux 状态异常" "session '$tmux_session_name' 已 detach，请手动 attach"
+            exit 1
+        fi
+
+        # 选择 IDE
+        if [ "$terminal_type" = "cursor+tmux" ]; then
+            target_app="Cursor"
+            app_full_name="Cursor"
+        else
+            target_app="Code"
+            app_full_name="Visual Studio Code"
+        fi
+
+        if ! pgrep -x "$target_app" >/dev/null 2>&1; then
+            notify_error "应用未运行" "$app_full_name.app 未启动"
+            exit 1
+        fi
+
+        # Activate IDE + raise 含项目名的 window
+        result=$(osascript <<EOF 2>&1
+tell application "$app_full_name" to activate
+delay 0.1
+tell application "System Events"
+    tell process "$target_app"
+        repeat with w in windows
+            if name of w contains "$project_name" then
+                set value of attribute "AXMain" of w to true
+                perform action "AXRaise" of w
+                return "OK"
+            end if
+        end repeat
+    end tell
+end tell
+return "NOTFOUND"
+EOF
+)
+        if [ "$result" != "OK" ]; then
+            notify_error "$app_full_name 窗口未找到" "找不到含 '$project_name' 的窗口"
+            exit 1
+        fi
+
+        # tmux 三级切换 — 用户切到集成终端就看到正确的 pane
+        tmux switch-client -c "$client_tty" -t "$tmux_session_id" 2>/dev/null
+        tmux select-window -t "$tmux_window_id" 2>/dev/null
+        tmux select-pane   -t "$tmux_pane_id"   2>/dev/null
+
+        log INFO "jump: $terminal_type complete (project=$project_name pane=$tmux_pane_id)"
+        ;;
+
     "iterm")
         if [ -z "$claude_session_id" ]; then
             notify_error "iTerm 信息缺失" "Session ID 为空"
